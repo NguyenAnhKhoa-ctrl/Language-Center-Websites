@@ -620,3 +620,79 @@ a {
         height: 260px;
     }
 }
+
+/* ============================================================================
+   7. ADMIN DASHBOARD LAYOUT & COMPONENTS
+   Phụ trách (Tuần 1 - Lý Hạo Danh - 52400175):
+   Sidebar Quản trị, Topbar Admin, Stat Cards & Responsive Toggle
+   ============================================================================ */
+#wrapper {
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+#sidebar-wrapper {
+    min-height: 100vh;
+    width: 260px;
+    flex-shrink: 0;
+    background-color: #0b132b;
+    transition: margin 0.25s ease-out;
+    display: flex;
+    flex-direction: column;
+}
+
+#sidebar-wrapper .list-group-item {
+    border: none;
+    padding: 12px 20px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: #cbd5e1 !important;
+    transition: all 0.2s ease;
+}
+
+#sidebar-wrapper .list-group-item:hover {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+}
+
+#sidebar-wrapper .list-group-item.active {
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.28) 0%, rgba(37, 99, 235, 0.05) 100%) !important;
+    color: #ffffff !important;
+    border-left: 4px solid #38bdf8;
+    font-weight: 600;
+}
+
+#page-content-wrapper {
+    min-width: 100vw;
+    background-color: #f8fafc;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: -260px;
+}
+
+.admin-stat-icon {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: 0;
+    }
+
+    #page-content-wrapper {
+        min-width: 0;
+        width: 100%;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: -260px;
+    }
+}
+
