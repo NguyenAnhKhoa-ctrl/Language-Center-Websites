@@ -1,8 +1,9 @@
 -- ============================================================================
 -- HỆ THỐNG WEBSITE QUẢN LÝ TRUNG TÂM NGOẠI NGỮ & GIA SƯ EDUCENTER
 -- File: database.sql
--- Phần phụ trách (Tuần 1 - Nguyễn Anh Khoa - 52400051):
--- Khởi tạo CSDL & 5 bảng: Users, Students, Courses, Classes, Enrollments
+-- Phần phụ trách:
+-- + Tuần 1 - Nguyễn Anh Khoa (52400051): Khởi tạo CSDL & 5 bảng: Users, Students, Courses, Classes, Enrollments
+-- + Tuần 1 - Lý Hạo Danh (52400175): Bổ sung 5 bảng: Teachers, Schedules, Attendance, Grades, Course_Registrations & Seed Data
 -- ============================================================================
 
 CREATE DATABASE IF NOT EXISTS `QuanLyTrungTam`
@@ -14,8 +15,13 @@ USE `QuanLyTrungTam`;
 -- ----------------------------------------------------------------------------
 -- 1. Bảng Users (Tài khoản người dùng & Phân quyền)
 -- ----------------------------------------------------------------------------
+DROP TABLE IF EXISTS `Course_Registrations`;
+DROP TABLE IF EXISTS `Grades`;
+DROP TABLE IF EXISTS `Attendance`;
+DROP TABLE IF EXISTS `Schedules`;
 DROP TABLE IF EXISTS `Enrollments`;
 DROP TABLE IF EXISTS `Classes`;
+DROP TABLE IF EXISTS `Teachers`;
 DROP TABLE IF EXISTS `Courses`;
 DROP TABLE IF EXISTS `Students`;
 DROP TABLE IF EXISTS `Users`;
@@ -140,3 +146,130 @@ INSERT INTO `Enrollments` (`enrollment_id`, `student_id`, `class_id`, `enrollmen
 (3, 3, 4, '2026-10-01', 'Đã hoàn thành'),
 (4, 4, 3, '2026-09-25', 'Bảo lưu'),
 (5, 5, 1, '2026-09-12', 'Đã hoàn thành');
+
+-- ============================================================================
+-- PHẦN BỔ SUNG (TUẦN 1 - LÝ HẠO DANH - 52400175)
+-- Các bảng: Teachers, Schedules, Attendance, Grades, Course_Registrations
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- 6. Bảng Teachers (Đội ngũ Giảng viên & Gia sư)
+-- ----------------------------------------------------------------------------
+CREATE TABLE `Teachers` (
+    `teacher_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT DEFAULT NULL,
+    `full_name` VARCHAR(100) NOT NULL,
+    `avatar` VARCHAR(255) DEFAULT NULL,
+    `phone` VARCHAR(20) NOT NULL,
+    `email` VARCHAR(100) NOT NULL,
+    `specialization` VARCHAR(120) NOT NULL COMMENT 'Chuyên môn giảng dạy',
+    `degree` VARCHAR(255) NOT NULL COMMENT 'Bằng cấp & Chứng chỉ quốc tế',
+    `experience` VARCHAR(255) DEFAULT NULL,
+    `rating` DECIMAL(3, 1) NOT NULL DEFAULT 5.0,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_teachers_user` FOREIGN KEY (`user_id`) REFERENCES `Users`(`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Seed Teachers trước khi gắn khóa ngoại vào bảng Classes
+INSERT INTO `Teachers` (`teacher_id`, `user_id`, `full_name`, `avatar`, `phone`, `email`, `specialization`, `degree`, `experience`, `rating`) VALUES
+(1, 2, 'Thầy Michael Roberts', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', '0988 123 456', 'michael.roberts@educenter.edu.vn', 'Trưởng khoa Giao tiếp & Thuyết trình', 'Thạc sĩ Ngôn ngữ học (ĐH Oxford), CELTA loại Xuất sắc', '10 năm giảng dạy tại các viện ngôn ngữ quốc tế', 4.9),
+(2, 3, 'Cô Nguyễn Thảo My', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80', '0977 234 567', 'thaomy.ielts@educenter.edu.vn', 'Chuyên gia Luyện thi IELTS 8.5+', 'IELTS 8.5 Overall (Writing 8.0, Speaking 8.5), Cử nhân Sư phạm Anh', '6 năm chuyên luyện thi IELTS cấp tốc du học', 5.0),
+(3, 4, 'Thầy Trần Đình Khôi', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', '0912 345 678', 'dinhkhoi.toeic@educenter.edu.vn', 'Chuyên gia Luyện thi TOEIC & Ngữ Pháp', 'TOEIC 990/990 Tuyệt đối, Thủ khoa ĐH Ngoại Thương', '8 năm đào tạo hơn 3,000 học viên đạt chuẩn đầu ra đại học', 4.8),
+(4, 5, 'Cô Lê Hoàng Bảo Trâm', 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80', '0933 456 789', 'baotram.tutor@educenter.edu.vn', 'Gia sư Cao cấp 1 Kèm 1 & Tiếng Anh Thiếu Nhi', 'Chứng chỉ TESOL Quốc tế, Cử nhân Tâm lý Giáo dục', '5 năm kinh nghiệm gia sư riêng cho học sinh trường quốc tế', 4.9);
+
+-- Bổ sung khóa ngoại từ Classes.teacher_id tham chiếu đến Teachers.teacher_id
+ALTER TABLE `Classes`
+    ADD CONSTRAINT `fk_classes_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `Teachers`(`teacher_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- ----------------------------------------------------------------------------
+-- 7. Bảng Schedules (Thời khóa biểu / Lịch học theo tuần)
+-- ----------------------------------------------------------------------------
+CREATE TABLE `Schedules` (
+    `schedule_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `class_id` INT NOT NULL,
+    `study_day` VARCHAR(30) NOT NULL COMMENT 'Thứ 2, Thứ 3, Thứ 4, Thứ 5, Thứ 6, Thứ 7, Chủ Nhật',
+    `study_time` VARCHAR(50) NOT NULL COMMENT 'Khung giờ ca học (VD: 18:00 - 19:30)',
+    `room` VARCHAR(50) NOT NULL,
+    CONSTRAINT `fk_schedules_class` FOREIGN KEY (`class_id`) REFERENCES `Classes`(`class_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `Schedules` (`schedule_id`, `class_id`, `study_day`, `study_time`, `room`) VALUES
+(1, 1, 'Thứ 2', '18:00 - 19:30', 'P.201'),
+(2, 1, 'Thứ 4', '18:00 - 19:30', 'P.201'),
+(3, 1, 'Thứ 6', '18:00 - 19:30', 'P.201'),
+(4, 2, 'Thứ 3', '19:45 - 21:15', 'P.102'),
+(5, 2, 'Thứ 5', '19:45 - 21:15', 'P.102'),
+(6, 3, 'Thứ 7', '19:45 - 21:15', 'P.101'),
+(7, 4, 'Thứ 7', '18:00 - 19:30', 'Phòng VIP 3'),
+(8, 4, 'Chủ Nhật', '18:00 - 19:30', 'Phòng VIP 3');
+
+-- ----------------------------------------------------------------------------
+-- 8. Bảng Attendance (Nhật ký Điểm danh chuyên cần)
+-- ----------------------------------------------------------------------------
+CREATE TABLE `Attendance` (
+    `attendance_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `class_id` INT NOT NULL,
+    `student_id` INT NOT NULL,
+    `attendance_date` DATE NOT NULL,
+    `lesson_name` VARCHAR(255) NOT NULL,
+    `status` VARCHAR(30) NOT NULL DEFAULT 'Có mặt' COMMENT 'Có mặt, Vắng mặt, Có phép',
+    `note` VARCHAR(255) DEFAULT NULL,
+    CONSTRAINT `fk_attendance_class` FOREIGN KEY (`class_id`) REFERENCES `Classes`(`class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `Students`(`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `Attendance` (`attendance_id`, `class_id`, `student_id`, `attendance_date`, `lesson_name`, `status`, `note`) VALUES
+(1, 1, 1, '2026-10-10', 'Buổi 24: Luyện đề Mock Test Speaking', 'Có mặt', 'Chuẩn bị bài tốt'),
+(2, 1, 1, '2026-10-08', 'Buổi 23: Chiến thuật Writing Task 1', 'Có mặt', 'Đúng giờ'),
+(3, 1, 1, '2026-10-05', 'Buổi 22: Phân tích dạng đề Matching Headings', 'Có phép', 'Bận thi giữa kỳ tại trường'),
+(4, 2, 2, '2026-10-09', 'Buổi 16: Thi thử TOEIC Full Test 3', 'Có mặt', 'Làm bài nghiêm túc'),
+(5, 4, 3, '2026-10-11', 'Buổi 12: Chữa đề thi thử THPT Chuyên', 'Có mặt', 'Đạt 9.2 điểm');
+
+-- ----------------------------------------------------------------------------
+-- 9. Bảng Grades (Bảng điểm 4 kỹ năng & Đánh giá học thuật)
+-- ----------------------------------------------------------------------------
+CREATE TABLE `Grades` (
+    `grade_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `student_id` INT NOT NULL,
+    `class_id` INT NOT NULL,
+    `exam_type` VARCHAR(50) NOT NULL DEFAULT 'Giữa khóa',
+    `listening_score` DECIMAL(5, 2) DEFAULT NULL,
+    `speaking_score` DECIMAL(5, 2) DEFAULT NULL,
+    `reading_score` DECIMAL(5, 2) DEFAULT NULL,
+    `writing_score` DECIMAL(5, 2) DEFAULT NULL,
+    `overall_score` DECIMAL(5, 2) NOT NULL,
+    `rank_level` VARCHAR(50) NOT NULL,
+    `teacher_comment` TEXT,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_grades_student` FOREIGN KEY (`student_id`) REFERENCES `Students`(`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_grades_class` FOREIGN KEY (`class_id`) REFERENCES `Classes`(`class_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `Grades` (`grade_id`, `student_id`, `class_id`, `exam_type`, `listening_score`, `speaking_score`, `reading_score`, `writing_score`, `overall_score`, `rank_level`, `teacher_comment`) VALUES
+(1, 1, 1, 'Giữa khóa', 7.50, 7.50, 8.00, 7.00, 7.50, 'Giỏi (IELTS 7.5)', 'Tiếp thu bài cực kỳ nhanh, kỹ năng Nghe và Đọc rất vững. Cần chú trọng mở rộng vốn từ vựng học thuật cho Task 2 Writing.'),
+(2, 2, 2, 'Giữa khóa', 430.00, NULL, 410.00, NULL, 840.00, 'Xuất sắc (840/990 TOEIC)', 'Khả năng bắt từ khóa phần Part 3 và Part 4 rất chuẩn xác. Ngữ pháp chắc chắn.'),
+(3, 3, 4, 'Giữa khóa', NULL, NULL, 8.80, 8.50, 8.65, 'Giỏi (Mục tiêu 9+ THPT)', 'Tiến bộ vượt bậc sau 1 tháng gia sư riêng. Đã xử lý tốt các câu hỏi phân loại về Collocations và Idioms.'),
+(4, 4, 3, 'Giữa khóa', 6.00, 6.50, 6.50, 6.00, 6.25, 'Khá', 'Phát âm cải thiện tốt, từ vựng phong phú.'),
+(5, 5, 1, 'Giữa khóa', 7.00, 7.00, 7.50, 6.50, 7.00, 'Giỏi (IELTS 7.0)', 'Tiếp thu nhanh, tư duy làm bài mạch lạc.');
+
+-- ----------------------------------------------------------------------------
+-- 10. Bảng Course_Registrations (Hồ sơ Đăng ký trực tuyến từ Client UI)
+-- ----------------------------------------------------------------------------
+CREATE TABLE `Course_Registrations` (
+    `registration_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `ticket_code` VARCHAR(30) NOT NULL UNIQUE,
+    `full_name` VARCHAR(100) NOT NULL,
+    `phone` VARCHAR(20) NOT NULL,
+    `email` VARCHAR(100) DEFAULT NULL,
+    `course_name` VARCHAR(150) NOT NULL,
+    `preferred_time` VARCHAR(80) DEFAULT NULL,
+    `notes` TEXT,
+    `status` VARCHAR(30) NOT NULL DEFAULT 'Chờ liên hệ',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `Course_Registrations` (`registration_id`, `ticket_code`, `full_name`, `phone`, `email`, `course_name`, `preferred_time`, `notes`, `status`) VALUES
+(1, 'DK101234', 'Nguyễn Hoàng Nam', '0983 221 456', 'hoangnam.nguyen@gmail.com', 'Luyện thi IELTS Intensive (Mục tiêu 6.5 - 7.5+)', 'Ca Tối (18:00 - 19:30)', 'Cần thi IELTS trước tháng 12 để nộp hồ sơ du học Canada', 'Chờ liên hệ'),
+(2, 'DK101189', 'Đỗ Minh Châu', '0912 889 001', 'minhchau.do@gmail.com', 'Gia sư Tiếng Anh 1 Kèm 1 Theo Yêu Cầu', 'Cuối tuần (Thứ 7 - CN)', 'Muốn học kèm riêng tại nhà hoặc qua Zoom cùng cô Bảo Trâm', 'Đã tư vấn'),
+(3, 'DK101045', 'Vũ Thị Quỳnh Như', '0977 445 123', 'quynhnhu.vu@gmail.com', 'Tiếng Anh Giao Tiếp Thực Chiến (100% Phản Xạ)', 'Ca Tối (19:45 - 21:15)', 'Người đi làm, muốn cải thiện kỹ năng nghe nói họp trực tuyến', 'Đã xếp lớp');
+
