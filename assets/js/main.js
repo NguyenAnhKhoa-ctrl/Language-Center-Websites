@@ -100,4 +100,29 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // 4. Xử lý điền nhanh dữ liệu mẫu & In phiếu kết quả trên trang Tra cứu (lookup.php - Lý Hạo Danh)
+    const demoButtons = document.querySelectorAll('.demo-fill-id');
+    const searchInput = document.getElementById('studentSearchInput');
+    const lookupForm = document.getElementById('lookupForm');
+
+    if (demoButtons.length > 0 && searchInput && lookupForm) {
+        demoButtons.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const sampleId = this.getAttribute('data-id');
+                if (sampleId) {
+                    searchInput.value = sampleId;
+                    lookupForm.submit();
+                }
+            });
+        });
+    }
+
+    const printBtn = document.getElementById('btnPrintResult');
+    if (printBtn) {
+        printBtn.addEventListener('click', function () {
+            window.print();
+        });
+    }
 });

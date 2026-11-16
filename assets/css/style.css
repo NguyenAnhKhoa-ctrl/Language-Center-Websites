@@ -827,5 +827,62 @@ a {
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.1);
 }
 
+/* Student Lookup Portal Styles */
+.lookup-card {
+    background: #ffffff;
+    border-radius: var(--edu-radius-lg);
+    box-shadow: var(--edu-shadow-md);
+    border: 1px solid var(--edu-border);
+    padding: 34px 32px;
+}
+
+.search-input-group .form-control {
+    border-radius: 12px 0 0 12px;
+    padding: 14px 20px;
+    font-size: 1rem;
+    border: 2px solid #cbd5e1;
+}
+
+.search-input-group .form-control:focus {
+    border-color: var(--edu-primary);
+    box-shadow: none;
+}
+
+.search-input-group .btn {
+    border-radius: 0 12px 12px 0;
+    padding: 0 28px;
+    font-weight: 600;
+}
+
+.score-badge-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 0 auto 8px auto;
+}
+
+@media print {
+    .edu-topbar,
+    .edu-navbar,
+    .edu-page-banner,
+    .lookup-card,
+    .edu-footer,
+    #btnPrintResult {
+        display: none !important;
+    }
+
+    #printArea {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+}
+
+
 
 
