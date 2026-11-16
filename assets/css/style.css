@@ -794,4 +794,38 @@ a {
     margin-top: 2px;
 }
 
+/* ============================================================================
+   9. TEACHERS, LOOKUP PORTAL & CONTACT STYLES (TUẦN 2 - LÝ HẠO DANH - 52400175)
+   ============================================================================ */
+.teacher-card {
+    background: #ffffff;
+    border-radius: var(--edu-radius-md);
+    border: 1px solid var(--edu-border);
+    padding: 26px 22px;
+    text-align: center;
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: var(--edu-shadow-sm);
+}
+
+.teacher-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--edu-shadow-lg);
+    border-color: #93c5fd;
+}
+
+.teacher-img {
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 16px auto;
+    border: 4px solid #eff6ff;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.1);
+}
+
+
 
