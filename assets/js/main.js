@@ -46,4 +46,58 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
+
+    // 3. Kiểm tra dữ liệu đầu vào (Client-side Validation) cho biểu mẫu register.php
+    const regForm = document.getElementById('courseRegistrationForm');
+    if (regForm) {
+        const fullNameInput = document.getElementById('full_name');
+        const phoneInput = document.getElementById('phone');
+        const emailInput = document.getElementById('email');
+
+        regForm.addEventListener('submit', function (event) {
+            let isValid = true;
+
+            // Kiểm tra họ tên
+            if (!fullNameInput.value || fullNameInput.value.trim().length < 2) {
+                fullNameInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                fullNameInput.classList.remove('is-invalid');
+            }
+
+            // Kiểm tra số điện thoại Việt Nam (10-11 số)
+            const cleanPhone = (phoneInput.value || '').replace(/[\s\.\-]+/g, '');
+            const phoneRegex = /^(0|\+84)[0-9]{8,10}$/;
+            if (!phoneRegex.test(cleanPhone)) {
+                phoneInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                phoneInput.classList.remove('is-invalid');
+            }
+
+            // Kiểm tra email nếu người dùng có nhập
+            const emailVal = (emailInput.value || '').trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailVal !== '' && !emailRegex.test(emailVal)) {
+                emailInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                emailInput.classList.remove('is-invalid');
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+
+        // Xóa trạng thái lỗi ngay khi người dùng nhập lại
+        [fullNameInput, phoneInput, emailInput].forEach(function (inputEl) {
+            if (inputEl) {
+                inputEl.addEventListener('input', function () {
+                    this.classList.remove('is-invalid');
+                });
+            }
+        });
+    }
 });
