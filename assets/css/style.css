@@ -914,6 +914,41 @@ a {
     transition: background-color 0.18s ease;
 }
 
+/* ============================================================================
+   11. ADMIN TEACHERS & SCHEDULE MATRIX STYLES (TUẦN 3 - LÝ HẠO DANH - 52400175)
+   ============================================================================ */
+.admin-teacher-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.admin-teacher-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1) !important;
+}
+
+.admin-teacher-avatar {
+    width: 88px;
+    height: 88px;
+    object-fit: cover;
+    border: 3px solid #eff6ff;
+}
+
+.schedule-matrix-table th,
+.schedule-matrix-table td {
+    vertical-align: middle;
+    min-width: 125px;
+}
+
+.schedule-slot-box {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.schedule-slot-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14) !important;
+}
+
+
 
 
 
