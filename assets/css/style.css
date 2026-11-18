@@ -948,6 +948,82 @@ a {
     box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14) !important;
 }
 
+/* ============================================================================
+   12. COMPREHENSIVE RESPONSIVE OPTIMIZATION (TUẦN 4 - NGUYỄN ANH KHOA)
+   Tối ưu hiển thị đa thiết bị: Smartphone (<576px), Tablet (576-991px), Desktop
+   ============================================================================ */
+#registrationsTable td {
+    vertical-align: middle;
+}
+
+@media (max-width: 991.98px) {
+    .edu-page-banner {
+        padding: 42px 0 48px 0;
+    }
+
+    .edu-form-card,
+    .edu-benefit-card,
+    .lookup-card {
+        padding: 22px 18px;
+    }
+
+    .edu-section {
+        padding: 50px 0;
+    }
+}
+
+@media (max-width: 767.98px) {
+    /* Admin Sidebar tự động thu gọn trên màn hình nhỏ và trượt ra khi nhấn nút menu */
+    #sidebar-wrapper {
+        margin-left: -260px;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1045;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0;
+        box-shadow: 8px 0 30px rgba(15, 23, 42, 0.45);
+    }
+
+    .edu-stat-number {
+        font-size: 1.65rem;
+    }
+
+    .edu-section-title {
+        font-size: 1.6rem;
+    }
+
+    .admin-stat-icon {
+        width: 46px;
+        height: 46px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .btn-trial-cta,
+    .btn-hero-primary,
+    .btn-hero-outline {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .edu-floating-card {
+        position: static;
+        margin-top: 12px;
+        justify-content: center;
+    }
+
+    .score-badge-circle {
+        width: 54px;
+        height: 54px;
+        font-size: 1.15rem;
+    }
+}
+
+
 
 
 
