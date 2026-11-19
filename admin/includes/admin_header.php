@@ -64,6 +64,9 @@ $adminTheme = $adminUser['theme'] ?? 'light';
             <a href="grades.php" class="list-group-item list-group-item-action bg-transparent text-white <?php echo ($active_menu === 'grades') ? 'active' : ''; ?>">
                 <i class="fa-solid fa-star me-2 text-warning"></i> Quản lý Điểm số
             </a>
+            <a href="finance.php" class="list-group-item list-group-item-action bg-transparent text-white <?php echo ($active_menu === 'finance') ? 'active' : ''; ?>">
+                <i class="fa-solid fa-coins me-2 text-success"></i> Tài chính &amp; Học phí
+            </a>
             <a href="registrations.php" class="list-group-item list-group-item-action bg-transparent text-white <?php echo ($active_menu === 'registrations') ? 'active' : ''; ?>">
                 <i class="fa-solid fa-envelope-open-text me-2 text-danger"></i> Đăng ký trực tuyến
                 <span class="badge bg-danger rounded-pill ms-2">Mới</span>
