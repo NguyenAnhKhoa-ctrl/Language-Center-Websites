@@ -2,10 +2,11 @@
 /**
  * EDUCENTER - HỆ THỐNG WEBSITE QUẢN LÝ TRUNG TÂM NGOẠI NGỮ & GIA SƯ
  * File: admin/includes/admin_header.php
- * Phụ trách (Tuần 1 - Lý Hạo Danh - 52400175):
+ * Phụ trách (Tuần 1 & Bổ sung Gói A2 - Lý Hạo Danh & Nguyễn Anh Khoa):
  * Header & Sidebar điều hướng dùng chung cho Phân hệ Quản trị (Admin Dashboard)
- * Tuân thủ chuẩn Relative URLs để chạy linh hoạt trên mọi cổng/thư mục
  */
+
+require_once __DIR__ . '/../../includes/auth_check.php';
 
 if (!isset($admin_title)) {
     $admin_title = 'Quản Trị Hệ Thống - EduCenter';
@@ -14,12 +15,11 @@ if (!isset($active_menu)) {
     $active_menu = 'dashboard';
 }
 
-// Thiết lập HTTP Security Headers chống XSS & Clickjacking (Tuần 4 - Lý Hạo Danh - 52400175)
-if (!headers_sent()) {
-    header('X-Content-Type-Options: nosniff');
-    header('X-Frame-Options: SAMEORIGIN');
-    header('Referrer-Policy: strict-origin-when-cross-origin');
-}
+$adminUser  = getCurrentUser();
+$adminName  = $adminUser['display_name'] ?? 'Quản Trị Viên';
+$adminEmail = $adminUser['email'] ?? 'admin@educenter.edu.vn';
+$adminAva   = $adminUser['avatar'] ?? 'https://ui-avatars.com/api/?name=Admin+Manager&background=1E40AF&color=fff';
+$adminTheme = $adminUser['theme'] ?? 'light';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -36,7 +36,7 @@ if (!headers_sent()) {
     <!-- Custom Style CSS (Relative Path) -->
     <link href="../assets/css/style.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body class="bg-light" data-edu-theme="<?php echo htmlspecialchars($adminTheme); ?>">
 <div class="d-flex" id="wrapper">
     <!-- SIDEBAR QUẢN TRỊ -->
     <div class="bg-dark text-white shadow" id="sidebar-wrapper">
@@ -54,6 +54,9 @@ if (!headers_sent()) {
             </a>
             <a href="teachers.php" class="list-group-item list-group-item-action bg-transparent text-white <?php echo ($active_menu === 'teachers') ? 'active' : ''; ?>">
                 <i class="fa-solid fa-chalkboard-user me-2 text-success"></i> Quản lý Giảng viên
+            </a>
+            <a href="courses.php" class="list-group-item list-group-item-action bg-transparent text-white <?php echo ($active_menu === 'courses') ? 'active' : ''; ?>">
+                <i class="fa-solid fa-book-open-reader me-2 text-info"></i> Khóa học &amp; Lớp 1-1
             </a>
             <a href="schedule.php" class="list-group-item list-group-item-action bg-transparent text-white <?php echo ($active_menu === 'schedule') ? 'active' : ''; ?>">
                 <i class="fa-solid fa-calendar-days me-2 text-primary"></i> Xếp lịch &amp; Điểm danh
@@ -91,17 +94,18 @@ if (!headers_sent()) {
 
                     <div class="dropdown">
                         <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://ui-avatars.com/api/?name=Admin+Manager&background=1E40AF&color=fff" alt="Admin" width="36" height="36" class="rounded-circle me-2">
+                            <img src="<?php echo htmlspecialchars($adminAva); ?>" alt="Admin" width="36" height="36" class="rounded-circle me-2 object-fit-cover">
                             <div class="d-none d-sm-block text-start">
-                                <strong class="d-block small">Quản Trị Viên</strong>
-                                <span class="text-muted" style="font-size: 0.75rem;">admin@educenter.edu.vn</span>
+                                <strong class="d-block small"><?php echo htmlspecialchars($adminName); ?></strong>
+                                <span class="text-muted" style="font-size: 0.75rem;"><?php echo htmlspecialchars($adminEmail); ?></span>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser">
                             <li><a class="dropdown-item" href="index.php"><i class="fa-solid fa-gauge-high me-2"></i>Tổng quan hệ thống</a></li>
+                            <li><a class="dropdown-item" href="../profile.php"><i class="fa-solid fa-user-gear me-2"></i>Hồ sơ &amp; Tùy chỉnh</a></li>
                             <li><a class="dropdown-item" href="../index.php"><i class="fa-solid fa-house me-2"></i>Trang chủ Client</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="../index.php"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a></li>
+                            <li><a class="dropdown-item text-danger" href="../logout.php"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a></li>
                         </ul>
                     </div>
                 </div>
