@@ -6,12 +6,16 @@
  * Cổng Tra cứu Bảng điểm 4 kỹ năng, Điểm danh & Lịch học trực tuyến
  */
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $pageTitle = 'Tra Cứu Bảng Điểm & Lịch Học Trực Tuyến - EduCenter';
 $currentPage = 'lookup.php';
 
 require_once __DIR__ . '/config/db.php';
 
-$search_query = isset($_GET['student_id']) ? trim($_GET['student_id']) : '';
+$search_query = isset($_GET['student_id']) ? trim(strip_tags((string)$_GET['student_id'])) : '';
 $student_data = null;
 $searched = false;
 

@@ -13,6 +13,13 @@ if (!isset($admin_title)) {
 if (!isset($active_menu)) {
     $active_menu = 'dashboard';
 }
+
+// Thiết lập HTTP Security Headers chống XSS & Clickjacking (Tuần 4 - Lý Hạo Danh - 52400175)
+if (!headers_sent()) {
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">

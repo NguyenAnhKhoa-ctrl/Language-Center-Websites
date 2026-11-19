@@ -423,16 +423,45 @@ function lookupStudentData($query, $pdo, $db_connected, $sample_data) {
     }
 
     $query_upper = strtoupper($query);
-    if (isset($sample_data[$query_upper])) {
-        return $sample_data[$query_upper];
-    }
+    $foundStudent = null;
 
-    foreach ($sample_data as $code => $student) {
-        if ($student['phone'] === $query || stripos($student['full_name'], $query) !== false || $code === $query_upper) {
-            return $student;
+    if (isset($sample_data[$query_upper])) {
+        $foundStudent = $sample_data[$query_upper];
+    } else {
+        foreach ($sample_data as $code => $student) {
+            if ($student['phone'] === $query || stripos($student['full_name'], $query) !== false || $code === $query_upper) {
+                $foundStudent = $student;
+                break;
+            }
         }
     }
 
-    return null;
+    // Đồng bộ trực tiếp dữ liệu điểm 4 kỹ năng & nhận xét vừa cập nhật từ Admin (Session Fallback)
+    if ($foundStudent !== null && isset($_SESSION['admin_grades_by_class']) && is_array($_SESSION['admin_grades_by_class'])) {
+        foreach ($_SESSION['admin_grades_by_class'] as $classRows) {
+            foreach ($classRows as $grRow) {
+                if (($grRow['student_code'] ?? '') === $foundStudent['student_id']) {
+                    $foundStudent['grades']['listening'] = $grRow['listening'];
+                    $foundStudent['grades']['speaking']  = $grRow['speaking'];
+                    $foundStudent['grades']['reading']   = $grRow['reading'];
+                    $foundStudent['grades']['writing']   = $grRow['writing'];
+                    $foundStudent['grades']['overall']   = $grRow['overall'];
+                    $foundStudent['grades']['rank']      = $grRow['rank'];
+                    $foundStudent['grades']['comment']   = $grRow['comment'];
+                    break 2;
+                }
+            }
+        }
+    }
+
+    return $foundStudent;
+}
+
+/**
+ * Hàm bảo mật chống XSS (Cross-Site Scripting) chuẩn hóa toàn hệ thống
+ * Phụ trách (Tuần 4 - Lý Hạo Danh - 52400175)
+ */
+function e($value) {
+    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 ?>
