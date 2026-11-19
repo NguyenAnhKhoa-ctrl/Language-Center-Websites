@@ -1068,6 +1068,82 @@ a {
     }
 }
 
+/* ============================================================================
+   14. USER PREFERENCES: LIGHT/DARK THEME & FONT SIZE (GÓI A3 - NGUYỄN ANH KHOA)
+   ============================================================================ */
+body[data-edu-font="small"] {
+    font-size: 0.9rem;
+}
+
+body[data-edu-font="medium"] {
+    font-size: 1rem;
+}
+
+body[data-edu-font="large"] {
+    font-size: 1.1rem;
+}
+
+body[data-edu-theme="dark"] {
+    --edu-bg: #0f172a;
+    --edu-card-bg: #1e293b;
+    --edu-text: #f1f5f9;
+    --edu-muted: #94a3b8;
+    --edu-border: #334155;
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+}
+
+body[data-edu-theme="dark"] .edu-navbar,
+body[data-edu-theme="dark"] .edu-stats-box,
+body[data-edu-theme="dark"] .edu-course-card,
+body[data-edu-theme="dark"] .edu-feature-box,
+body[data-edu-theme="dark"] .edu-form-card,
+body[data-edu-theme="dark"] .edu-benefit-card,
+body[data-edu-theme="dark"] .lookup-card,
+body[data-edu-theme="dark"] .teacher-card,
+body[data-edu-theme="dark"] .contact-info-card,
+body[data-edu-theme="dark"] .card,
+body[data-edu-theme="dark"] .bg-white,
+body[data-edu-theme="dark"] .modal-content {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+
+body[data-edu-theme="dark"] #page-content-wrapper,
+body[data-edu-theme="dark"] .bg-light {
+    background-color: #0f172a !important;
+    color: #e2e8f0 !important;
+}
+
+body[data-edu-theme="dark"] .text-dark,
+body[data-edu-theme="dark"] .edu-section-title,
+body[data-edu-theme="dark"] .edu-course-title,
+body[data-edu-theme="dark"] .edu-brand {
+    color: #f8fafc !important;
+}
+
+body[data-edu-theme="dark"] .edu-nav-link {
+    color: #cbd5e1 !important;
+}
+
+body[data-edu-theme="dark"] .form-control,
+body[data-edu-theme="dark"] .form-select,
+body[data-edu-theme="dark"] .input-group-text {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+body[data-edu-theme="dark"] .table {
+    --bs-table-bg: #1e293b;
+    --bs-table-color: #e2e8f0;
+    --bs-table-border-color: #334155;
+    --bs-table-hover-bg: #334155;
+    --bs-table-hover-color: #ffffff;
+}
+
+
 
 
 

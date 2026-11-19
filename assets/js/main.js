@@ -125,4 +125,64 @@ document.addEventListener('DOMContentLoaded', function () {
             window.print();
         });
     }
+
+    // 5. Chuyển đổi giao diện Sáng / Tối (User Preferences - Gói A3 Nguyễn Anh Khoa)
+    const themeToggleBtn = document.getElementById('btnThemeToggle');
+    const themeIcon = document.getElementById('themeToggleIcon');
+    const savedTheme = localStorage.getItem('educenter_theme');
+    const savedFont = localStorage.getItem('educenter_font_size');
+
+    if (savedTheme) {
+        document.body.setAttribute('data-edu-theme', savedTheme);
+        if (themeIcon) {
+            themeIcon.className = (savedTheme === 'dark') ? 'fa-solid fa-sun text-warning' : 'fa-solid fa-moon';
+        }
+    }
+    if (savedFont) {
+        document.body.setAttribute('data-edu-font', savedFont);
+    }
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', function () {
+            const currentTheme = document.body.getAttribute('data-edu-theme') === 'dark' ? 'dark' : 'light';
+            const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-edu-theme', nextTheme);
+            localStorage.setItem('educenter_theme', nextTheme);
+            if (themeIcon) {
+                themeIcon.className = (nextTheme === 'dark') ? 'fa-solid fa-sun text-warning' : 'fa-solid fa-moon';
+            }
+        });
+    }
+
+    // 6. Đăng ký Service Worker PWA & Đồng bộ dữ liệu Offline vào LocalStorage (Gói A3)
+    const offlineBanner = document.getElementById('offlineStatusBanner');
+    function updateOnlineStatus() {
+        if (!offlineBanner) return;
+        if (navigator.onLine) {
+            offlineBanner.classList.add('d-none');
+        } else {
+            offlineBanner.classList.remove('d-none');
+        }
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+
+    // Lưu kết quả bảng điểm tra cứu gần nhất vào LocalStorage để xem được khi Offline
+    const printAreaEl = document.getElementById('printArea');
+    if (printAreaEl) {
+        try {
+            localStorage.setItem('educenter_last_lookup_html', printAreaEl.innerHTML);
+            localStorage.setItem('educenter_last_lookup_time', new Date().toLocaleString('vi-VN'));
+        } catch (e) {
+            // Bỏ qua nếu bộ nhớ trình duyệt bị giới hạn
+        }
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(function () {
+            // Bỏ qua nếu chạy từ thư mục con hoặc môi trường chặn SW
+        });
+    }
 });
