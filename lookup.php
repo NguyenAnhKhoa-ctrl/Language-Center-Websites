@@ -2,20 +2,99 @@
 /**
  * EDUCENTER - HỆ THỐNG WEBSITE QUẢN LÝ TRUNG TÂM NGOẠI NGỮ & GIA SƯ
  * File: lookup.php
- * Phụ trách (Tuần 2 - Lý Hạo Danh - 52400175):
- * Cổng Tra cứu Bảng điểm 4 kỹ năng, Điểm danh & Lịch học trực tuyến
+ * Phụ trách (Tuần 2 & Bổ sung Gói B3 - Lý Hạo Danh - 52400175):
+ * Cổng Tra cứu Bảng điểm 4 kỹ năng, Điểm danh, Lịch học, Nộp bài tập về nhà & Thanh toán Học phí QR
  */
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$pageTitle = 'Tra Cứu Bảng Điểm & Lịch Học Trực Tuyến - EduCenter';
+$pageTitle = 'Tra Cứu Bảng Điểm, Bài Tập & Học Phí Trực Tuyến - EduCenter';
 $currentPage = 'lookup.php';
 
 require_once __DIR__ . '/config/db.php';
 
 $search_query = isset($_GET['student_id']) ? trim(strip_tags((string)$_GET['student_id'])) : '';
+if ($search_query === '' && isset($_POST['student_id'])) {
+    $search_query = trim(strip_tags((string)$_POST['student_id']));
+}
+
+// Khởi tạo dữ liệu bài tập & trạng thái học phí mặc định trong Session
+if (!isset($_SESSION['student_homework'])) {
+    $_SESSION['student_homework'] = [
+        'HV001' => [
+            ['title' => 'Bài tập Writing Task 2 - Chủ đề Education & Technology', 'date' => '12/10/2026', 'link' => 'writing_task2_nguyenvanan.pdf', 'status' => 'Đã chấm: 8.0/9.0'],
+            ['title' => 'Bài thu âm Speaking Part 2 - Describe a book you read', 'date' => '09/10/2026', 'link' => 'speaking_part2_audio.mp3', 'status' => 'Đã chấm: 7.5/9.0']
+        ],
+        'HV002' => [
+            ['title' => 'Giải đề TOEIC Reading Part 5, 6, 7 - Test 04', 'date' => '11/10/2026', 'link' => 'toeic_test04_answers.pdf', 'status' => 'Đã chấm: 425/495']
+        ],
+        'HV003' => [
+            ['title' => 'Chuyên đề Đọc hiểu & Từ vựng THPT Quốc Gia', 'date' => '12/10/2026', 'link' => 'thpt_reading_huy.docx', 'status' => 'Đã chấm: 9.0/10']
+        ]
+    ];
+}
+
+if (!isset($_SESSION['student_tuition_status'])) {
+    $_SESSION['student_tuition_status'] = [
+        'HV001' => ['invoice_code' => 'HD202601', 'amount' => 8900000, 'status' => 'Chờ thanh toán kỳ 2', 'paid' => false],
+        'HV002' => ['invoice_code' => 'HD202602', 'amount' => 4500000, 'status' => 'Đã hoàn tất học phí', 'paid' => true],
+        'HV003' => ['invoice_code' => 'HD202603', 'amount' => 6500000, 'status' => 'Chờ thanh toán khóa 1-1', 'paid' => false]
+    ];
+}
+
+$portalFlash = '';
+$activePortalTab = isset($_GET['ptab']) ? trim($_GET['ptab']) : 'grades';
+
+// Xử lý Nộp bài tập về nhà & Thanh toán học phí QR trực tuyến
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['portal_action'])) {
+    $portalAction = $_POST['portal_action'];
+    $stCode       = strtoupper(trim($_POST['student_code'] ?? 'HV001'));
+
+    if ($portalAction === 'submit_homework') {
+        $activePortalTab = 'homework';
+        $hwTitle = trim($_POST['hw_title'] ?? '');
+        $hwLink  = trim($_POST['hw_link'] ?? '');
+
+        if ($hwTitle !== '') {
+            if (!isset($_SESSION['student_homework'][$stCode])) {
+                $_SESSION['student_homework'][$stCode] = [];
+            }
+            array_unshift($_SESSION['student_homework'][$stCode], [
+                'title'  => $hwTitle,
+                'date'   => date('d/m/Y H:i'),
+                'link'   => $hwLink !== '' ? $hwLink : 'baitap_hocvien_upload.pdf',
+                'status' => 'Đã nộp - Chờ giảng viên chấm'
+            ]);
+            $portalFlash = 'Đã nộp bài tập <strong>' . htmlspecialchars($hwTitle) . '</strong> lên hệ thống cho giảng viên chấm điểm!';
+        }
+    } elseif ($portalAction === 'pay_tuition_qr') {
+        $activePortalTab = 'tuition';
+        $payMethod       = trim($_POST['payment_channel'] ?? 'VietQR Ngân hàng');
+
+        $_SESSION['student_tuition_status'][$stCode] = [
+            'invoice_code' => $_SESSION['student_tuition_status'][$stCode]['invoice_code'] ?? ('HD' . random_int(202610, 202999)),
+            'amount'       => $_SESSION['student_tuition_status'][$stCode]['amount'] ?? 8900000,
+            'status'       => 'Đã thanh toán qua ' . $payMethod,
+            'paid'         => true
+        ];
+
+        // Đồng bộ trạng thái sang danh sách hóa đơn của Admin (admin/finance.php)
+        if (isset($_SESSION['admin_tuition_invoices'])) {
+            foreach ($_SESSION['admin_tuition_invoices'] as &$inv) {
+                if ($inv['student_code'] === $stCode) {
+                    $inv['status']         = 'Đã thanh toán';
+                    $inv['payment_method'] = $payMethod;
+                }
+            }
+            unset($inv);
+        }
+
+        $portalFlash = 'Xác nhận thanh toán học phí trực tuyến qua <strong>' . htmlspecialchars($payMethod) . '</strong> thành công! Hóa đơn đã được cập nhật.';
+    }
+}
+
 $student_data = null;
 $searched = false;
 
@@ -30,11 +109,11 @@ require_once __DIR__ . '/includes/header.php';
     <!-- 1. SUBPAGE HERO BANNER -->
     <section class="edu-page-banner">
         <div class="container text-center">
-            <span class="edu-page-badge">HỆ THỐNG TRA CỨU ĐIỆN TỬ</span>
-            <h1 class="edu-page-title">Tra Cứu Bảng Điểm &amp; Lịch Học</h1>
+            <span class="edu-page-badge">HỆ THỐNG TRA CỨU &amp; HỌC TẬP ĐIỆN TỬ</span>
+            <h1 class="edu-page-title">Tra Cứu Bảng Điểm, Bài Tập &amp; Học Phí</h1>
             <p class="edu-page-subtitle">
-                Học viên và phụ huynh dễ dàng tra cứu điểm kiểm tra định kỳ, tỷ lệ
-                chuyên cần điểm danh và lịch học các buổi tiếp theo.
+                Học viên và phụ huynh dễ dàng tra cứu điểm kiểm tra định kỳ, tỷ lệ chuyên cần,
+                nộp bài tập về nhà và thanh toán học phí trực tuyến qua mã QR.
             </p>
         </div>
     </section>
@@ -77,8 +156,25 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
             </div>
 
+            <?php if ($portalFlash !== ''): ?>
+                <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+                    <i class="fa-solid fa-circle-check me-2"></i><?php echo $portalFlash; ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
+
             <?php if ($searched): ?>
                 <?php if ($student_data): ?>
+                    <?php
+                        $stCode = $student_data['student_id'];
+                        $hwList = $_SESSION['student_homework'][$stCode] ?? [];
+                        $tuitionInfo = $_SESSION['student_tuition_status'][$stCode] ?? [
+                            'invoice_code' => 'HD202609',
+                            'amount'       => 8900000,
+                            'status'       => 'Chờ thanh toán học phí',
+                            'paid'         => false
+                        ];
+                    ?>
                     <!-- KẾT QUẢ TRA CỨU HỢP LỆ -->
                     <div class="bg-white rounded-4 border shadow-sm p-4 p-md-5" id="printArea">
                         <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 mb-4">
@@ -130,28 +226,38 @@ require_once __DIR__ . '/includes/header.php';
                             </div>
                         </div>
 
-                        <!-- TAB ĐIỂM SỐ - ĐIỂM DANH - LỊCH HỌC -->
+                        <!-- 5 TAB: ĐIỂM SỐ - ĐIỂM DANH - LỊCH HỌC - BÀI TẬP & TÀI LIỆU - HỌC PHÍ QR -->
                         <ul class="nav nav-pills mb-4 border-bottom pb-3 gap-2" id="lookupTabs" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active px-4 py-2 fw-bold" id="grades-tab" data-bs-toggle="pill" data-bs-target="#tab-grades" type="button" role="tab">
-                                    <i class="fa-solid fa-star me-2 text-warning"></i>Bảng Điểm &amp; Đánh Giá
+                                <button class="nav-link <?php echo ($activePortalTab === 'grades') ? 'active' : ''; ?> px-3 py-2 fw-bold" id="grades-tab" data-bs-toggle="pill" data-bs-target="#tab-grades" type="button" role="tab">
+                                    <i class="fa-solid fa-star me-1 text-warning"></i>Bảng Điểm &amp; Đánh Giá
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link px-4 py-2 fw-bold" id="attendance-tab" data-bs-toggle="pill" data-bs-target="#tab-attendance" type="button" role="tab">
-                                    <i class="fa-solid fa-clipboard-check me-2 text-success"></i>Chuyên Cần &amp; Điểm Danh
+                                <button class="nav-link <?php echo ($activePortalTab === 'attendance') ? 'active' : ''; ?> px-3 py-2 fw-bold" id="attendance-tab" data-bs-toggle="pill" data-bs-target="#tab-attendance" type="button" role="tab">
+                                    <i class="fa-solid fa-clipboard-check me-1 text-success"></i>Chuyên Cần &amp; Điểm Danh
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link px-4 py-2 fw-bold" id="schedule-tab" data-bs-toggle="pill" data-bs-target="#tab-schedule" type="button" role="tab">
-                                    <i class="fa-solid fa-calendar-days me-2 text-primary"></i>Lịch Học Tuần Này
+                                <button class="nav-link <?php echo ($activePortalTab === 'schedule') ? 'active' : ''; ?> px-3 py-2 fw-bold" id="schedule-tab" data-bs-toggle="pill" data-bs-target="#tab-schedule" type="button" role="tab">
+                                    <i class="fa-solid fa-calendar-days me-1 text-primary"></i>Lịch Học Tuần
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link <?php echo ($activePortalTab === 'homework') ? 'active' : ''; ?> px-3 py-2 fw-bold" id="homework-tab" data-bs-toggle="pill" data-bs-target="#tab-homework" type="button" role="tab">
+                                    <i class="fa-solid fa-book-open-reader me-1 text-info"></i>Tài Liệu &amp; Nộp Bài Tập
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link <?php echo ($activePortalTab === 'tuition') ? 'active' : ''; ?> px-3 py-2 fw-bold" id="tuition-tab" data-bs-toggle="pill" data-bs-target="#tab-tuition" type="button" role="tab">
+                                    <i class="fa-solid fa-qrcode me-1 text-danger"></i>Học Phí &amp; Thanh Toán QR
                                 </button>
                             </li>
                         </ul>
 
                         <div class="tab-content" id="lookupTabsContent">
                             <!-- TAB 1: BẢNG ĐIỂM 4 KỸ NĂNG -->
-                            <div class="tab-pane fade show active" id="tab-grades" role="tabpanel">
+                            <div class="tab-pane fade <?php echo ($activePortalTab === 'grades') ? 'show active' : ''; ?>" id="tab-grades" role="tabpanel">
                                 <div class="row g-4 align-items-center mb-4">
                                     <div class="col-md-8">
                                         <div class="row g-3 text-center">
@@ -223,7 +329,7 @@ require_once __DIR__ . '/includes/header.php';
                             </div>
 
                             <!-- TAB 2: ĐIỂM DANH & CHUYÊN CẦN -->
-                            <div class="tab-pane fade" id="tab-attendance" role="tabpanel">
+                            <div class="tab-pane fade <?php echo ($activePortalTab === 'attendance') ? 'show active' : ''; ?>" id="tab-attendance" role="tabpanel">
                                 <div class="row g-4 mb-2">
                                     <div class="col-md-4 text-center">
                                         <div class="p-4 border rounded-4 bg-light h-100">
@@ -281,7 +387,7 @@ require_once __DIR__ . '/includes/header.php';
                             </div>
 
                             <!-- TAB 3: LỊCH HỌC TUẦN -->
-                            <div class="tab-pane fade" id="tab-schedule" role="tabpanel">
+                            <div class="tab-pane fade <?php echo ($activePortalTab === 'schedule') ? 'show active' : ''; ?>" id="tab-schedule" role="tabpanel">
                                 <h6 class="fw-bold mb-3">
                                     <i class="fa-solid fa-calendar-check text-primary me-2"></i>Lịch học cố định hàng tuần:
                                 </h6>
@@ -309,6 +415,213 @@ require_once __DIR__ . '/includes/header.php';
                                         </tbody>
                                     </table>
                                 </div>
+                            </div>
+
+                            <!-- TAB 4: TÀI LIỆU BÀI GIẢNG & NỘP BÀI TẬP VỀ NHÀ (GÓI B3) -->
+                            <div class="tab-pane fade <?php echo ($activePortalTab === 'homework') ? 'show active' : ''; ?>" id="tab-homework" role="tabpanel">
+                                <div class="row g-4">
+                                    <!-- Kho tài liệu học tập -->
+                                    <div class="col-lg-5">
+                                        <div class="p-4 rounded-4 bg-light border h-100">
+                                            <h6 class="fw-bold text-dark mb-3">
+                                                <i class="fa-solid fa-folder-open text-primary me-2"></i>Tài Liệu Bài Giảng Lớp <?php echo htmlspecialchars($student_data['class_name']); ?>
+                                            </h6>
+                                            <div class="list-group list-group-flush rounded-3 border bg-white">
+                                                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                                    <div>
+                                                        <i class="fa-solid fa-file-pdf text-danger me-2"></i>
+                                                        <strong class="small">Đề cương &amp; Chiến thuật giải đề trọng tâm.pdf</strong>
+                                                        <small class="d-block text-muted">Dung lượng: 4.2 MB</small>
+                                                    </div>
+                                                    <span class="badge bg-primary-subtle text-primary">PDF</span>
+                                                </div>
+                                                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                                    <div>
+                                                        <i class="fa-solid fa-file-audio text-info me-2"></i>
+                                                        <strong class="small">Bộ Audio Luyện Nghe Phản Xạ Tuần 4.zip</strong>
+                                                        <small class="d-block text-muted">Dung lượng: 18.5 MB</small>
+                                                    </div>
+                                                    <span class="badge bg-info-subtle text-info">Audio</span>
+                                                </div>
+                                                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                                    <div>
+                                                        <i class="fa-solid fa-file-lines text-success me-2"></i>
+                                                        <strong class="small">Bộ đề Mock Test Giữa Khóa kèm Đáp án.pdf</strong>
+                                                        <small class="d-block text-muted">Dung lượng: 6.1 MB</small>
+                                                    </div>
+                                                    <span class="badge bg-success-subtle text-success">Mock Test</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Biểu mẫu nộp bài tập & lịch sử chấm bài -->
+                                    <div class="col-lg-7">
+                                        <div class="p-4 rounded-4 border bg-white mb-3">
+                                            <h6 class="fw-bold text-dark mb-3">
+                                                <i class="fa-solid fa-cloud-arrow-up text-success me-2"></i>Nộp Bài Tập Về Nhà Trực Tuyến
+                                            </h6>
+                                            <form action="lookup.php?student_id=<?php echo urlencode($stCode); ?>&amp;ptab=homework" method="POST" class="row g-2">
+                                                <input type="hidden" name="portal_action" value="submit_homework">
+                                                <input type="hidden" name="student_code" value="<?php echo htmlspecialchars($stCode); ?>">
+                                                <div class="col-md-6">
+                                                    <input type="text" name="hw_title" class="form-control form-control-sm" placeholder="Tên bài tập (VD: Writing Task 2 Unit 5)..." required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <input type="text" name="hw_link" class="form-control form-control-sm" placeholder="Link Google Drive / Tên file...">
+                                                </div>
+                                                <div class="col-md-2 d-grid">
+                                                    <button type="submit" class="btn btn-sm btn-success fw-semibold">
+                                                        <i class="fa-solid fa-paper-plane me-1"></i>Nộp bài
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered align-middle small mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Bài tập đã nộp</th>
+                                                        <th>Tệp / Liên kết</th>
+                                                        <th>Ngày nộp</th>
+                                                        <th>Kết quả chấm</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach ($hwList as $hw): ?>
+                                                        <tr>
+                                                            <td class="fw-semibold"><?php echo htmlspecialchars($hw['title']); ?></td>
+                                                            <td class="text-primary"><i class="fa-solid fa-paperclip me-1"></i><?php echo htmlspecialchars($hw['link']); ?></td>
+                                                            <td class="text-muted"><?php echo htmlspecialchars($hw['date']); ?></td>
+                                                            <td>
+                                                                <span class="badge bg-success-subtle text-success"><?php echo htmlspecialchars($hw['status']); ?></span>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAB 5: HỌC PHÍ & THANH TOÁN TRỰC TUYẾN QR (GÓI B3) -->
+                            <div class="tab-pane fade <?php echo ($activePortalTab === 'tuition') ? 'show active' : ''; ?>" id="tab-tuition" role="tabpanel">
+                                <div class="row g-4 align-items-center">
+                                    <div class="col-lg-7">
+                                        <div class="p-4 rounded-4 border bg-light">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <span class="badge bg-primary px-3 py-2 rounded-pill">
+                                                    Mã hóa đơn: <?php echo htmlspecialchars($tuitionInfo['invoice_code']); ?>
+                                                </span>
+                                                <?php if (!empty($tuitionInfo['paid'])): ?>
+                                                    <span class="badge bg-success px-3 py-2 rounded-pill">
+                                                        <i class="fa-solid fa-circle-check me-1"></i><?php echo htmlspecialchars($tuitionInfo['status']); ?>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                                                        <i class="fa-solid fa-clock me-1"></i><?php echo htmlspecialchars($tuitionInfo['status']); ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <h5 class="fw-bold text-dark mb-1">
+                                                Học phí chương trình: <?php echo htmlspecialchars($student_data['class_name']); ?>
+                                            </h5>
+                                            <p class="text-muted small mb-3">
+                                                Học viên: <strong><?php echo htmlspecialchars($student_data['full_name']); ?></strong> (<?php echo htmlspecialchars($stCode); ?>)
+                                            </p>
+
+                                            <div class="d-flex justify-content-between align-items-center p-3 bg-white rounded-3 border mb-3">
+                                                <span class="text-secondary fw-semibold">Tổng mức học phí niêm yết:</span>
+                                                <span class="fs-4 fw-bold text-danger"><?php echo number_format((float)$tuitionInfo['amount'], 0, ',', '.'); ?>đ</span>
+                                            </div>
+
+                                            <?php if (empty($tuitionInfo['paid'])): ?>
+                                                <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#qrPaymentModal">
+                                                    <i class="fa-solid fa-qrcode me-2"></i>Thanh Toán Trực Tuyến Bằng Mã QR (VietQR / MoMo / VNPay)
+                                                </button>
+                                            <?php else: ?>
+                                                <div class="alert alert-success mb-0 small border-0">
+                                                    <i class="fa-solid fa-shield-check me-1"></i>Học viên đã hoàn thành nghĩa vụ học phí cho khóa học hiện tại.
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-5 text-center">
+                                        <div class="p-4 rounded-4 border bg-white shadow-sm">
+                                            <h6 class="fw-bold text-dark mb-2">
+                                                <i class="fa-solid fa-building-columns text-primary me-1"></i>Mã VietQR Chuyển Khoản Nhanh
+                                            </h6>
+                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&amp;data=<?php echo urlencode('EDUCENTER_TUITION_' . $stCode . '_' . $tuitionInfo['amount']); ?>"
+                                                 alt="VietQR EduCenter"
+                                                 class="img-fluid rounded-3 border p-2 mb-2"
+                                                 style="width: 170px; height: 170px;">
+                                            <div class="small text-muted">
+                                                Nội dung CK: <strong class="text-primary">EDUCENTER <?php echo htmlspecialchars($stCode); ?></strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODAL THANH TOÁN HỌC PHÍ TRỰC TUYẾN QR -->
+                    <div class="modal fade" id="qrPaymentModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow rounded-4">
+                                <form action="lookup.php?student_id=<?php echo urlencode($stCode); ?>&amp;ptab=tuition" method="POST">
+                                    <input type="hidden" name="portal_action" value="pay_tuition_qr">
+                                    <input type="hidden" name="student_code" value="<?php echo htmlspecialchars($stCode); ?>">
+                                    <div class="modal-header border-bottom-0 pb-0">
+                                        <h5 class="modal-title fw-bold text-dark">
+                                            <i class="fa-solid fa-qrcode text-primary me-2"></i>Cổng Thanh Toán Học Phí Trực Tuyến QR
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <p class="small text-muted mb-3">
+                                            Quét mã QR bên dưới bằng ứng dụng Ngân hàng hoặc Ví điện tử để thanh toán học phí cho mã hồ sơ <strong><?php echo htmlspecialchars($stCode); ?></strong>
+                                        </p>
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&amp;data=<?php echo urlencode('EDUCENTER_PAY_' . $stCode . '_' . $tuitionInfo['amount']); ?>"
+                                             alt="QR Payment"
+                                             class="img-fluid rounded-3 border p-2 mb-3"
+                                             style="width: 190px; height: 190px;">
+
+                                        <div class="p-3 rounded-3 bg-light border text-start small mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="text-muted">Đơn vị thụ hưởng:</span>
+                                                <strong>TRUNG TÂM NGOẠI NGỮ EDUCENTER</strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="text-muted">Số tiền thanh toán:</span>
+                                                <strong class="text-danger"><?php echo number_format((float)$tuitionInfo['amount'], 0, ',', '.'); ?>đ</strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="text-muted">Nội dung chuyển khoản:</span>
+                                                <strong class="text-primary">HP <?php echo htmlspecialchars($stCode); ?></strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-start">
+                                            <label class="form-label fw-semibold small">Chọn cổng thanh toán xác nhận:</label>
+                                            <select name="payment_channel" class="form-select">
+                                                <option value="VietQR Ngân hàng">Chuyển khoản nhanh VietQR 24/7</option>
+                                                <option value="Ví điện tử MoMo">Ví điện tử MoMo QR</option>
+                                                <option value="Cổng VNPay QR">Cổng thanh toán VNPay QR</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-top-0 pt-0">
+                                        <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">
+                                            <i class="fa-solid fa-circle-check me-1"></i>Xác Nhận Đã Chuyển Khoản
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
