@@ -45,7 +45,7 @@ if (isset($_GET['reset_success'])) {
     $infoBanner = 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại bằng mật khẩu mới.';
 }
 if (isset($_GET['auth_required'])) {
-    $infoBanner = 'Khu vực Quản trị Hệ thống yêu cầu đăng nhập bằng Tài khoản Quản trị viên (Admin: admin@educenter.edu.vn / 123456).';
+    $infoBanner = 'Khu vực Quản trị Hệ thống yêu cầu đăng nhập bằng Tài khoản Quản trị viên.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -185,33 +185,6 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                     </form>
 
-                    <!-- Hộp chọn nhanh tài khoản mẫu phục vụ Giảng viên chấm điểm -->
-                    <div class="p-3 rounded-3 bg-light border mb-3">
-                        <div class="small fw-bold text-secondary mb-2">
-                            <i class="fa-solid fa-bolt text-warning me-1"></i> Bấm để điền nhanh tài khoản chấm điểm (Mật khẩu: <code>123456</code>):
-                        </div>
-                        <div class="d-flex flex-wrap gap-2">
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-primary rounded-pill quick-login-fill"
-                                    data-user="admin@educenter.edu.vn"
-                                    data-pass="123456">
-                                <i class="fa-solid fa-user-shield me-1"></i>Admin
-                            </button>
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-success rounded-pill quick-login-fill"
-                                    data-user="thaomy.ielts@educenter.edu.vn"
-                                    data-pass="123456">
-                                <i class="fa-solid fa-chalkboard-user me-1"></i>Giảng viên
-                            </button>
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-dark rounded-pill quick-login-fill"
-                                    data-user="nguyenvanan@gmail.com"
-                                    data-pass="123456">
-                                <i class="fa-solid fa-user-graduate me-1"></i>Học viên (HV001)
-                            </button>
-                        </div>
-                    </div>
-
                     <div class="text-center small text-muted">
                         Chưa có tài khoản?
                         <a href="signup.php" class="fw-bold text-primary">Đăng ký tài khoản mới</a>
@@ -221,16 +194,5 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </div>
 </section>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.quick-login-fill').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            document.getElementById('loginIdentifier').value = this.getAttribute('data-user');
-            document.getElementById('loginPassword').value = this.getAttribute('data-pass');
-        });
-    });
-});
-</script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
