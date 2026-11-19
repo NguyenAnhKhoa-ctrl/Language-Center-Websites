@@ -459,9 +459,22 @@ function lookupStudentData($query, $pdo, $db_connected, $sample_data) {
 
 /**
  * Hàm bảo mật chống XSS (Cross-Site Scripting) chuẩn hóa toàn hệ thống
- * Phụ trách (Tuần 4 - Lý Hạo Danh - 52400175)
+ * Phụ trách (Tuần 4 & Gói B1 - Lý Hạo Danh - 52400175)
  */
 function e($value) {
     return htmlspecialchars((string)($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+/**
+ * Tạo URL Avatar mặc định khi người dùng chưa tải lên ảnh đại diện riêng
+ */
+function getDefaultAvatarUrl($displayName, $role = 'student') {
+    $bgMap = [
+        'admin'   => '1E40AF',
+        'teacher' => '0284C7',
+        'student' => '059669'
+    ];
+    $bg = $bgMap[$role] ?? '2563EB';
+    return 'https://ui-avatars.com/api/?name=' . urlencode((string)$displayName) . '&background=' . $bg . '&color=fff&size=256';
 }
 ?>

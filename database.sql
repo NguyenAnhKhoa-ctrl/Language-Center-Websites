@@ -29,8 +29,14 @@ DROP TABLE IF EXISTS `Users`;
 CREATE TABLE `Users` (
     `user_id` INT AUTO_INCREMENT PRIMARY KEY,
     `username` VARCHAR(50) NOT NULL UNIQUE,
+    `email` VARCHAR(100) DEFAULT NULL COMMENT 'Địa chỉ email đăng ký & khôi phục mật khẩu',
+    `display_name` VARCHAR(100) DEFAULT NULL COMMENT 'Tên hiển thị trên giao diện',
     `password` VARCHAR(255) NOT NULL COMMENT 'Mật khẩu đã mã hóa bcrypt',
     `role` ENUM('admin', 'teacher', 'student') NOT NULL DEFAULT 'student',
+    `avatar` VARCHAR(255) DEFAULT NULL COMMENT 'Đường dẫn ảnh đại diện',
+    `is_activated` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '0: Chưa kích hoạt email, 1: Đã kích hoạt',
+    `theme_pref` VARCHAR(20) NOT NULL DEFAULT 'light' COMMENT 'light hoặc dark',
+    `font_size` VARCHAR(20) NOT NULL DEFAULT 'medium' COMMENT 'small, medium, large',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
