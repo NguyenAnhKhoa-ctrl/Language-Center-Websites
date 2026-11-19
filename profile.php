@@ -498,9 +498,11 @@ require_once __DIR__ . '/includes/header.php';
                 var selectedTheme = prefForm.querySelector('input[name="theme_pref"]:checked');
                 var selectedFont = document.getElementById('fontSizeSelect');
                 if (selectedTheme) {
+                    localStorage.setItem('educenter_theme', selectedTheme.value);
                     localStorage.setItem('edu_theme', selectedTheme.value);
                 }
                 if (selectedFont) {
+                    localStorage.setItem('educenter_font_size', selectedFont.value);
                     localStorage.setItem('edu_font_size', selectedFont.value);
                 }
             });

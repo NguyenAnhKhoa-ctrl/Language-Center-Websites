@@ -16,6 +16,9 @@ $currentPage = 'lookup.php';
 require_once __DIR__ . '/config/db.php';
 
 $search_query = isset($_GET['student_id']) ? trim(strip_tags((string)$_GET['student_id'])) : '';
+if ($search_query === '' && isset($_GET['query'])) {
+    $search_query = trim(strip_tags((string)$_GET['query']));
+}
 if ($search_query === '' && isset($_POST['student_id'])) {
     $search_query = trim(strip_tags((string)$_POST['student_id']));
 }

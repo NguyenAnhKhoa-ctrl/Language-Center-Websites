@@ -538,7 +538,7 @@ require_once __DIR__ . '/includes/admin_header.php';
                 </ul>
             </div>
             <div class="modal-footer border-top-0">
-                <a href="../lookup.php?query=HV001" id="viewStudentLookupLink" class="btn btn-outline-primary btn-sm">
+                <a href="../lookup.php?student_id=HV001" id="viewStudentLookupLink" class="btn btn-outline-primary btn-sm">
                     <i class="fa-solid fa-chart-simple me-1"></i> Xem Bảng Điểm &amp; Chuyên Cần
                 </a>
                 <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">Đóng</button>
@@ -649,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('viewStudentPhone').textContent = this.getAttribute('data-phone');
             document.getElementById('viewStudentClass').textContent = this.getAttribute('data-class');
             document.getElementById('viewStudentStatus').textContent = this.getAttribute('data-status');
-            document.getElementById('viewStudentLookupLink').setAttribute('href', '../lookup.php?query=' + encodeURIComponent(code));
+            document.getElementById('viewStudentLookupLink').setAttribute('href', '../lookup.php?student_id=' + encodeURIComponent(code));
         });
     });
 

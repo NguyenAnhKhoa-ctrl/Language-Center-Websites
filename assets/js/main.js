@@ -129,8 +129,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // 5. Chuyển đổi giao diện Sáng / Tối (User Preferences - Gói A3 Nguyễn Anh Khoa)
     const themeToggleBtn = document.getElementById('btnThemeToggle');
     const themeIcon = document.getElementById('themeToggleIcon');
-    const savedTheme = localStorage.getItem('educenter_theme');
-    const savedFont = localStorage.getItem('educenter_font_size');
+    const savedTheme = localStorage.getItem('educenter_theme') || localStorage.getItem('edu_theme');
+    const savedFont = localStorage.getItem('educenter_font_size') || localStorage.getItem('edu_font_size');
 
     if (savedTheme) {
         document.body.setAttribute('data-edu-theme', savedTheme);
