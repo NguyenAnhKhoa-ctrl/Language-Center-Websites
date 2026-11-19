@@ -8,6 +8,9 @@
 
 require_once __DIR__ . '/../../includes/auth_check.php';
 
+// Bắt buộc phải đăng nhập bằng tài khoản Quản trị viên (Admin) mới được truy cập trang Quản trị
+requireAdminAccount();
+
 if (!isset($admin_title)) {
     $admin_title = 'Quản Trị Hệ Thống - EduCenter';
 }

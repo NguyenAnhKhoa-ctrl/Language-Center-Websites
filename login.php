@@ -14,19 +14,24 @@ $currentPage = 'login.php';
 
 $redirectTarget = isset($_GET['redirect']) ? trim($_GET['redirect']) : '';
 
-// Nếu đã đăng nhập, chuyển hướng về trang tương ứng
-if (getCurrentUser() !== null && !isset($_GET['switch'])) {
+// Nếu đã đăng nhập, chuyển hướng về trang tương ứng (trừ khi đang yêu cầu đăng nhập quyền Admin)
+if (getCurrentUser() !== null && !isset($_GET['switch']) && !isset($_GET['auth_required'])) {
     $u = getCurrentUser();
     if ($redirectTarget !== '') {
-        header('Location: ' . $redirectTarget);
+        if (strpos($redirectTarget, 'admin/') === 0 && ($u['role'] ?? '') !== 'admin') {
+            // Không phải tài khoản Admin thì không tự chuyển vào admin/
+        } else {
+            header('Location: ' . $redirectTarget);
+            exit;
+        }
+    } else {
+        if (($u['role'] ?? '') === 'admin') {
+            header('Location: admin/index.php');
+        } else {
+            header('Location: index.php');
+        }
         exit;
     }
-    if ($u['role'] === 'admin' || $u['role'] === 'teacher') {
-        header('Location: admin/index.php');
-    } else {
-        header('Location: index.php');
-    }
-    exit;
 }
 
 $identifier = '';
@@ -40,7 +45,7 @@ if (isset($_GET['reset_success'])) {
     $infoBanner = 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại bằng mật khẩu mới.';
 }
 if (isset($_GET['auth_required'])) {
-    $infoBanner = 'Vui lòng đăng nhập tài khoản để truy cập khu vực này.';
+    $infoBanner = 'Khu vực Quản trị Hệ thống yêu cầu đăng nhập bằng Tài khoản Quản trị viên (Admin: admin@educenter.edu.vn / 123456).';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -79,18 +84,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($matchedUser !== null && verifyEduPassword($password, $matchedUser['password_hash'])) {
-            $_SESSION['edu_user'] = $matchedUser;
+            // Nếu người dùng đang cố truy cập trang Quản trị (admin/*) nhưng đăng nhập tài khoản không phải Admin
+            if (strpos($redirectTarget, 'admin/') === 0 && ($matchedUser['role'] ?? '') !== 'admin') {
+                $loginError = 'Tài khoản này không có quyền Quản trị viên! Vui lòng đăng nhập bằng tài khoản Quản trị viên (admin@educenter.edu.vn) để vào Web Quản trị.';
+            } else {
+                $_SESSION['edu_user'] = $matchedUser;
 
-            if ($redirectTarget !== '') {
-                header('Location: ' . $redirectTarget);
+                if ($redirectTarget !== '') {
+                    header('Location: ' . $redirectTarget);
+                    exit;
+                }
+                if (($matchedUser['role'] ?? '') === 'admin') {
+                    header('Location: admin/index.php');
+                } else {
+                    header('Location: index.php');
+                }
                 exit;
             }
-            if ($matchedUser['role'] === 'admin' || $matchedUser['role'] === 'teacher') {
-                header('Location: admin/index.php');
-            } else {
-                header('Location: index.php');
-            }
-            exit;
         } else {
             $loginError = 'Email/Tên đăng nhập hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại.';
         }

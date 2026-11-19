@@ -108,11 +108,13 @@ $userFont    = $currentUser['font_size'] ?? 'medium';
                                     <i class="fa-solid fa-user-gear me-2 text-primary"></i>Hồ sơ &amp; Tùy chỉnh
                                 </a>
                             </li>
-                            <li>
-                                <a class="dropdown-item" href="admin/index.php">
-                                    <i class="fa-solid fa-gauge-high me-2 text-info"></i>Bảng điều khiển Admin
-                                </a>
-                            </li>
+                            <?php if (($currentUser['role'] ?? '') === 'admin'): ?>
+                                <li>
+                                    <a class="dropdown-item" href="admin/index.php">
+                                        <i class="fa-solid fa-gauge-high me-2 text-info"></i>Bảng điều khiển Admin
+                                    </a>
+                                </li>
+                            <?php endif; ?>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item text-danger" href="logout.php">

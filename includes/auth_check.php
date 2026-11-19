@@ -76,6 +76,18 @@ function getCurrentUser() {
 }
 
 /**
+ * Bắt buộc phải đăng nhập bằng Tài khoản Quản trị viên (role === 'admin') mới được vào Web Quản trị
+ */
+function requireAdminAccount() {
+    $currentUser = getCurrentUser();
+    if ($currentUser === null || ($currentUser['role'] ?? '') !== 'admin') {
+        $currentScript = basename($_SERVER['PHP_SELF'] ?? 'index.php');
+        header('Location: ../login.php?auth_required=1&redirect=' . urlencode('admin/' . $currentScript));
+        exit;
+    }
+}
+
+/**
  * Kiểm tra mật khẩu đăng nhập (hỗ trợ bcrypt hash + mật khẩu mẫu 123456 / password)
  */
 function verifyEduPassword($inputPassword, $storedHash) {
