@@ -1023,6 +1023,52 @@ a {
     }
 }
 
+/* ============================================================================
+   13. PRINTABLE GRADE SHEET & FEEDBACK STYLES (TUẦN 4 - LÝ HẠO DANH - 52400175)
+   ============================================================================ */
+.grade-comment-input {
+    border: 1px solid transparent;
+    background-color: transparent;
+    font-size: 0.84rem;
+    color: #64748b;
+    padding: 6px 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.grade-comment-input:hover,
+.grade-comment-input:focus {
+    border-color: #cbd5e1;
+    background-color: #ffffff;
+    color: #1e293b;
+}
+
+@media print {
+    #sidebar-wrapper,
+    #page-content-wrapper > nav,
+    .no-print {
+        display: none !important;
+    }
+
+    #page-content-wrapper {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+    }
+
+    .skill-input,
+    .grade-comment-input {
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        appearance: none;
+        -moz-appearance: textfield;
+    }
+}
+
+
 
 
 

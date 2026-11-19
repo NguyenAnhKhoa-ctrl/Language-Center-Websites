@@ -3,7 +3,7 @@
  * EDUCENTER - HỆ THỐNG WEBSITE QUẢN LÝ TRUNG TÂM NGOẠI NGỮ & GIA SƯ
  * File: admin/grades.php
  * Phụ trách (Tuần 4 - Lý Hạo Danh - 52400175):
- * Quản lý Điểm số 4 kỹ năng (Nghe, Nói, Đọc, Viết), Tự động tính Overall & Xếp loại học lực
+ * Quản lý Điểm số 4 kỹ năng, Tự động tính Overall, Lưu nhận xét giáo viên & In Bảng Điểm
  */
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -18,25 +18,28 @@ $active_menu = 'grades';
 // Danh sách lớp học và cấu hình thang điểm tương ứng
 $classConfigs = [
     'IELTS Intensive K42' => [
-        'label'   => 'IELTS Intensive K42 (Giảng viên: Cô Thảo My)',
-        'teacher' => 'Cô Nguyễn Thảo My',
-        'scale'   => 'ielts',
-        'step'    => '0.5',
-        'max'     => '9.0'
+        'class_id' => 1,
+        'label'    => 'IELTS Intensive K42 (Giảng viên: Cô Thảo My)',
+        'teacher'  => 'Cô Nguyễn Thảo My',
+        'scale'    => 'ielts',
+        'step'     => '0.5',
+        'max'      => '9.0'
     ],
     'TOEIC 750+ Cấp Tốc' => [
-        'label'   => 'TOEIC 750+ Cấp Tốc (Giảng viên: Thầy Đình Khôi)',
-        'teacher' => 'Thầy Trần Đình Khôi',
-        'scale'   => 'toeic',
-        'step'    => '5',
-        'max'     => '495'
+        'class_id' => 2,
+        'label'    => 'TOEIC 750+ Cấp Tốc (Giảng viên: Thầy Đình Khôi)',
+        'teacher'  => 'Thầy Trần Đình Khôi',
+        'scale'    => 'toeic',
+        'step'     => '5',
+        'max'      => '495'
     ],
     'Gia Sư 1-1 Thi Đại Học' => [
-        'label'   => 'Gia Sư 1-1 Thi Đại Học (Gia sư: Cô Bảo Trâm)',
-        'teacher' => 'Cô Lê Hoàng Bảo Trâm',
-        'scale'   => 'gpa10',
-        'step'    => '0.25',
-        'max'     => '10.0'
+        'class_id' => 4,
+        'label'    => 'Gia Sư 1-1 Thi Đại Học (Gia sư: Cô Bảo Trâm)',
+        'teacher'  => 'Cô Lê Hoàng Bảo Trâm',
+        'scale'    => 'gpa10',
+        'step'     => '0.25',
+        'max'      => '10.0'
     ]
 ];
 
@@ -195,7 +198,7 @@ $scaleMode  = isset($_GET['scale']) ? trim($_GET['scale']) : $currentCfg['scale'
 
 $flashMessage = '';
 
-// Xử lý lưu và tính điểm Overall khi giáo viên nhấn Cập Nhật Tất Cả Điểm
+// Xử lý lưu bảng điểm 4 kỹ năng & nhận xét chi tiết của giảng viên
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_grades') {
     $selectedClass = trim($_POST['class_name'] ?? 'IELTS Intensive K42');
     if (!isset($classConfigs[$selectedClass])) {
@@ -209,6 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $speakingScores  = $_POST['speaking'] ?? [];
     $readingScores   = $_POST['reading'] ?? [];
     $writingScores   = $_POST['writing'] ?? [];
+    $commentsInput   = $_POST['comment'] ?? [];
 
     if (isset($_SESSION['admin_grades_by_class'][$selectedClass])) {
         foreach ($_SESSION['admin_grades_by_class'][$selectedClass] as &$row) {
@@ -217,6 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $s   = isset($speakingScores[$sid])  ? (float)$speakingScores[$sid]  : (float)$row['speaking'];
             $r   = isset($readingScores[$sid])   ? (float)$readingScores[$sid]   : (float)$row['reading'];
             $w   = isset($writingScores[$sid])   ? (float)$writingScores[$sid]   : (float)$row['writing'];
+            $cmt = isset($commentsInput[$sid])   ? trim($commentsInput[$sid])    : $row['comment'];
 
             $calc = calculateOverallAndRank($l, $s, $r, $w, $scaleMode);
 
@@ -226,11 +231,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $row['writing']   = $w;
             $row['overall']   = $calc['overall'];
             $row['rank']      = $calc['rank'];
+            $row['comment']   = $cmt;
+
+            // Lưu đồng bộ xuống bảng Grades trong MySQL nếu đang kết nối
+            if ($db_connected && $pdo) {
+                try {
+                    $stmtCheck = $pdo->prepare("SELECT grade_id FROM Grades WHERE student_id = :sid AND class_id = :cid LIMIT 1");
+                    $stmtCheck->execute([
+                        ':sid' => $sid,
+                        ':cid' => (int)$currentCfg['class_id']
+                    ]);
+                    $existingGradeId = $stmtCheck->fetchColumn();
+
+                    if ($existingGradeId) {
+                        $stmtUpd = $pdo->prepare("
+                            UPDATE Grades
+                            SET listening_score = :l, speaking_score = :s, reading_score = :r, writing_score = :w,
+                                overall_score = :ov, rank_level = :rk, teacher_comment = :cmt
+                            WHERE grade_id = :gid
+                        ");
+                        $stmtUpd->execute([
+                            ':l'   => $l,
+                            ':s'   => $s,
+                            ':r'   => $r,
+                            ':w'   => $w,
+                            ':ov'  => $calc['overall'],
+                            ':rk'  => $calc['rank'],
+                            ':cmt' => $cmt,
+                            ':gid' => (int)$existingGradeId
+                        ]);
+                    } else {
+                        $stmtIns = $pdo->prepare("
+                            INSERT INTO Grades (student_id, class_id, exam_type, listening_score, speaking_score, reading_score, writing_score, overall_score, rank_level, teacher_comment)
+                            VALUES (:sid, :cid, :et, :l, :s, :r, :w, :ov, :rk, :cmt)
+                        ");
+                        $stmtIns->execute([
+                            ':sid' => $sid,
+                            ':cid' => (int)$currentCfg['class_id'],
+                            ':et'  => $examType,
+                            ':l'   => $l,
+                            ':s'   => $s,
+                            ':r'   => $r,
+                            ':w'   => $w,
+                            ':ov'  => $calc['overall'],
+                            ':rk'  => $calc['rank'],
+                            ':cmt' => $cmt
+                        ]);
+                    }
+                } catch (Exception $e) {
+                    // Fallback Session
+                }
+            }
         }
         unset($row);
     }
 
-    $flashMessage = "Đã tính toán điểm Overall và cập nhật bảng điểm lớp <strong>" . htmlspecialchars($selectedClass) . "</strong> thành công!";
+    $flashMessage = "Đã lưu điểm 4 kỹ năng, điểm Overall và nhận xét giảng viên của lớp <strong>" . htmlspecialchars($selectedClass) . "</strong> lên Cổng tra cứu!";
 }
 
 $gradesList = $_SESSION['admin_grades_by_class'][$selectedClass] ?? [];
@@ -238,8 +294,20 @@ $gradesList = $_SESSION['admin_grades_by_class'][$selectedClass] ?? [];
 require_once __DIR__ . '/includes/admin_header.php';
 ?>
 
+<!-- TIÊU ĐỀ BẢNG ĐIỂM DÀNH RIÊNG CHO CHẾ ĐỘ IN ẤN (@media print) -->
+<div class="d-none d-print-block text-center border-bottom pb-3 mb-4">
+    <h4 class="fw-bold mb-1 text-uppercase">Hệ Thống Đào Tạo Ngoại Ngữ &amp; Gia Sư Quốc Tế EduCenter</h4>
+    <h5 class="fw-semibold mb-2">BẢNG ĐIỂM ĐÁNH GIÁ KẾT QUẢ HỌC THUẬT 4 KỸ NĂNG</h5>
+    <div class="small">
+        <strong>Lớp học:</strong> <?php echo htmlspecialchars($selectedClass); ?> |
+        <strong>Giảng viên:</strong> <?php echo htmlspecialchars($currentCfg['teacher']); ?> |
+        <strong>Kỳ thi:</strong> <?php echo htmlspecialchars($examType); ?> |
+        <strong>Ngày in:</strong> <?php echo date('d/m/Y'); ?>
+    </div>
+</div>
+
 <!-- TIÊU ĐỀ TRANG & NÚT THAO TÁC NHANH -->
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2 no-print">
     <div>
         <h3 class="fw-bold mb-1">Quản Lý Điểm Số &amp; Đánh Giá Học Viên</h3>
         <p class="text-muted small mb-0">Nhập điểm 4 kỹ năng định kỳ, tính toán điểm tổng kết và ghi chú đánh giá học thuật</p>
@@ -255,14 +323,14 @@ require_once __DIR__ . '/includes/admin_header.php';
 </div>
 
 <?php if ($flashMessage !== ''): ?>
-    <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+    <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4 no-print" role="alert">
         <i class="fa-solid fa-circle-check me-2"></i><?php echo $flashMessage; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
 
 <!-- BỘ LỌC LỚP HỌC, ĐỢT KIỂM TRA & THANG ĐIỂM -->
-<div class="card border-0 shadow-sm rounded-4 mb-4">
+<div class="card border-0 shadow-sm rounded-4 mb-4 no-print">
     <div class="card-body p-3">
         <form action="grades.php" method="GET" class="row g-3 align-items-center">
             <div class="col-md-4">
@@ -334,7 +402,7 @@ require_once __DIR__ . '/includes/admin_header.php';
                         <th style="width: 105px;">Viết</th>
                         <th style="width: 120px;">Overall</th>
                         <th style="width: 115px;">Xếp Loại</th>
-                        <th class="text-start pe-4" style="min-width: 250px;">Nhận xét giáo viên</th>
+                        <th class="text-start pe-4" style="min-width: 260px;">Nhận xét giáo viên</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -398,7 +466,11 @@ require_once __DIR__ . '/includes/admin_header.php';
                                 </span>
                             </td>
                             <td class="text-start pe-4">
-                                <small class="text-muted"><?php echo htmlspecialchars($gr['comment']); ?></small>
+                                <input type="text"
+                                       name="comment[<?php echo $sid; ?>]"
+                                       class="form-control form-control-sm grade-comment-input"
+                                       value="<?php echo htmlspecialchars($gr['comment']); ?>"
+                                       placeholder="Nhập nhận xét chi tiết...">
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -406,12 +478,28 @@ require_once __DIR__ . '/includes/admin_header.php';
             </table>
         </div>
 
-        <div class="card-footer bg-white py-3 border-0 text-end">
+        <div class="card-footer bg-white py-3 border-0 text-end no-print">
             <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold">
                 <i class="fa-solid fa-check me-1"></i>Cập Nhật Tất Cả Điểm
             </button>
         </div>
     </form>
+</div>
+
+<!-- KHUNG CHỮ KÝ XÁC NHẬN DÀNH CHO TRANG IN (@media print) -->
+<div class="d-none d-print-block mt-5 pt-3">
+    <div class="row text-center">
+        <div class="col-6">
+            <strong>GIẢNG VIÊN PHỤ TRÁCH LỚP</strong>
+            <p class="small text-muted mb-5">(Ký và ghi rõ họ tên)</p>
+            <strong class="d-block mt-4"><?php echo htmlspecialchars($currentCfg['teacher']); ?></strong>
+        </div>
+        <div class="col-6">
+            <strong>BAN QUẢN TRỊ ĐÀO TẠO EDUCENTER</strong>
+            <p class="small text-muted mb-5">(Ký xác nhận và đóng dấu)</p>
+            <strong class="d-block mt-4">Phòng Đào Tạo &amp; Khảo Thí</strong>
+        </div>
+    </div>
 </div>
 
 <script>
