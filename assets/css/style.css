@@ -1143,6 +1143,195 @@ body[data-edu-theme="dark"] .table {
     --bs-table-hover-color: #ffffff;
 }
 
+/* ============================================================================
+   15. AUTO-RESIZE MOBILE UI ENGINE (TỰ ĐỘNG CO GIÃN GIAO DIỆN ĐIỆN THOẠI)
+   Tự động điều chỉnh tỷ lệ khung nhìn, thanh cuộn ngang, bảng dữ liệu & Modal
+   ============================================================================ */
+:root {
+    --edu-vh: 1vh;
+    --edu-ui-scale: 1;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+/* Lớp phủ mờ khi mở Sidebar Admin trên điện thoại */
+.edu-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 1040;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.edu-sidebar-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Gợi ý vuốt ngang cho bảng dữ liệu rộng trên màn hình điện thoại */
+.edu-mobile-table-hint {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #2563eb;
+    background: #eff6ff;
+    border-bottom: 1px dashed #bfdbfe;
+    padding: 6px 12px;
+}
+
+body[data-edu-theme="dark"] .edu-mobile-table-hint {
+    background: #1e3a8a;
+    color: #e0f2fe;
+    border-bottom-color: #3b82f6;
+}
+
+@media (max-width: 767.98px) {
+    /* Tự động co giãn cỡ chữ gốc mượt theo chiều rộng màn hình điện thoại */
+    html {
+        font-size: clamp(14px, 3.8vw, 16px);
+    }
+
+    body {
+        overflow-x: hidden;
+        width: 100%;
+    }
+
+    .container,
+    .container-fluid {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    /* Tự động biến các thanh Tab / Bộ lọc thành thanh trượt ngang mượt trên cảm ứng */
+    #courseFilterBar,
+    #lookupTabs,
+    #courseAdminTabs,
+    #financeTabs,
+    #scheduleTab {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        justify-content: flex-start !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 6px;
+        gap: 8px !important;
+    }
+
+    #courseFilterBar::-webkit-scrollbar,
+    #lookupTabs::-webkit-scrollbar,
+    #courseAdminTabs::-webkit-scrollbar,
+    #financeTabs::-webkit-scrollbar,
+    #scheduleTab::-webkit-scrollbar {
+        display: none;
+    }
+
+    #courseFilterBar .btn,
+    #lookupTabs .nav-link,
+    #courseAdminTabs .nav-link,
+    #financeTabs .nav-link,
+    #scheduleTab .nav-link {
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-size: 0.85rem;
+        padding: 8px 14px !important;
+    }
+
+    /* Chống tự động phóng to (Auto-zoom) trên iOS/Android khi chạm vào ô nhập liệu */
+    input.form-control,
+    select.form-select,
+    textarea.form-control {
+        font-size: 16px !important;
+    }
+
+    /* Tự động thu gọn bảng dữ liệu và hiển thị gợi ý vuốt ngang khi bảng tràn khung */
+    .edu-mobile-table-hint.is-overflowing {
+        display: flex;
+    }
+
+    .table th,
+    .table td {
+        padding: 10px 8px;
+        font-size: 0.85rem;
+    }
+
+    /* Tự động co giãn khung tìm kiếm Cổng tra cứu trên điện thoại */
+    .search-input-group {
+        flex-direction: column;
+        gap: 8px;
+        box-shadow: none !important;
+    }
+
+    .search-input-group .form-control {
+        border-right: 2px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        width: 100%;
+    }
+
+    .search-input-group .btn {
+        border-radius: 12px !important;
+        padding: 12px 20px !important;
+        width: 100%;
+    }
+
+    /* Tự động cân chỉnh kích thước Modal vừa khít chiều cao thực tế của điện thoại */
+    .modal-dialog {
+        margin: 10px;
+        max-height: calc(var(--edu-vh, 1vh) * 94);
+    }
+
+    .modal-content {
+        max-height: calc(var(--edu-vh, 1vh) * 92);
+        overflow-y: auto;
+    }
+
+    /* Tự động thu gọn ảnh giảng viên & thẻ khóa học vừa màn hình dọc */
+    .edu-course-card,
+    .teacher-card {
+        padding: 18px;
+    }
+
+    .admin-teacher-avatar {
+        width: 72px;
+        height: 72px;
+    }
+}
+
+/* Tối ưu riêng cho màn hình điện thoại nhỏ (< 400px như iPhone SE / Mini) */
+@media (max-width: 399.98px) {
+    html {
+        font-size: 13.5px;
+    }
+
+    .edu-brand {
+        font-size: 1.25rem;
+    }
+
+    .edu-brand-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 1rem;
+    }
+
+    .edu-hero-title {
+        font-size: 1.65rem;
+    }
+
+    .edu-page-title {
+        font-size: 1.5rem;
+    }
+}
+
+
 
 
 

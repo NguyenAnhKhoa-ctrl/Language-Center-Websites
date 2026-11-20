@@ -185,4 +185,67 @@ document.addEventListener('DOMContentLoaded', function () {
             // Bỏ qua nếu chạy từ thư mục con hoặc môi trường chặn SW
         });
     }
+
+    // 7. AUTO-RESIZE MOBILE UI ENGINE (Tự động co giãn giao diện cho điện thoại & máy tính bảng)
+    function initAutoResizeMobileUI() {
+        // A. Chuẩn hóa từng khung nhìn cảm ứng & gợi ý vuốt ngang cho các bảng dữ liệu lớn
+        const tableWrappers = document.querySelectorAll('.table-responsive');
+        tableWrappers.forEach(function (wrapper) {
+            if (!wrapper.previousElementSibling || !wrapper.previousElementSibling.classList.contains('edu-mobile-table-hint')) {
+                const hint = document.createElement('div');
+                hint.className = 'edu-mobile-table-hint no-print';
+                hint.innerHTML = '<i class="fa-solid fa-arrows-left-right"></i> <span>Vuốt ngang bảng để xem đầy đủ thông tin</span>';
+                wrapper.parentNode.insertBefore(hint, wrapper);
+
+                wrapper.addEventListener('scroll', function () {
+                    if (wrapper.scrollLeft > 15) {
+                        hint.classList.remove('is-overflowing');
+                    }
+                }, { passive: true });
+            }
+        });
+
+        function applyViewportAdaptation() {
+            const vw = window.innerWidth || document.documentElement.clientWidth;
+            const vh = window.innerHeight || document.documentElement.clientHeight;
+
+            // Cập nhật biến --edu-vh chuẩn xác theo chiều cao hiển thị thực tế trên trình duyệt di động
+            document.documentElement.style.setProperty('--edu-vh', (vh * 0.01) + 'px');
+
+            // Gán nhãn thiết bị lên body để CSS và các thành phần tự động thích ứng
+            let deviceType = 'desktop';
+            if (vw < 400) {
+                deviceType = 'mobile-xs';
+            } else if (vw < 768) {
+                deviceType = 'mobile';
+            } else if (vw < 992) {
+                deviceType = 'tablet';
+            }
+            document.body.setAttribute('data-device', deviceType);
+
+            // Kiểm tra các bảng dữ liệu có tràn chiều ngang trên điện thoại hay không
+            tableWrappers.forEach(function (wrapper) {
+                const hint = wrapper.previousElementSibling;
+                if (hint && hint.classList.contains('edu-mobile-table-hint')) {
+                    if (vw < 768 && wrapper.scrollWidth > wrapper.clientWidth + 6 && wrapper.scrollLeft <= 15) {
+                        hint.classList.add('is-overflowing');
+                    } else {
+                        hint.classList.remove('is-overflowing');
+                    }
+                }
+            });
+        }
+
+        applyViewportAdaptation();
+        window.addEventListener('resize', applyViewportAdaptation, { passive: true });
+        window.addEventListener('orientationchange', function () {
+            setTimeout(applyViewportAdaptation, 120);
+        }, { passive: true });
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', applyViewportAdaptation, { passive: true });
+        }
+    }
+
+    initAutoResizeMobileUI();
 });
