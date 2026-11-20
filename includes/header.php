@@ -42,33 +42,6 @@ $userFont    = $currentUser['font_size'] ?? 'medium';
         <i class="fa-solid fa-wifi-slash me-1"></i> Bạn đang ở chế độ Ngoại tuyến (Offline Mode) — Dữ liệu đang được hiển thị từ bộ nhớ đệm PWA &amp; LocalStorage.
     </div>
 
-    <!-- 0.1. Thanh thông báo tài khoản chưa kích hoạt Email (Account Activation Notification) -->
-    <?php if ($currentUser !== null && empty($currentUser['is_activated'])): ?>
-        <div class="bg-warning text-dark py-2 px-3 border-bottom border-warning-subtle shadow-sm">
-            <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2 small">
-                <div>
-                    <i class="fa-solid fa-envelope-circle-check me-2 text-danger"></i>
-                    <strong>Tài khoản chưa được xác thực!</strong> Một email chứa liên kết kích hoạt đã được gửi tới
-                    <strong><?php echo htmlspecialchars($currentUser['email']); ?></strong>. Vui lòng kiểm tra hộp thư để hoàn tất kích hoạt.
-                </div>
-                <a href="<?php echo htmlspecialchars($currentPage); ?>?activate_account=1" class="btn btn-sm btn-dark fw-semibold rounded-pill px-3">
-                    <i class="fa-solid fa-check-double me-1 text-warning"></i> Bấm để kích hoạt ngay (Link Email)
-                </a>
-            </div>
-        </div>
-    <?php endif; ?>
-
-    <!-- 0.2. Thông báo xác nhận khi vừa kích hoạt tài khoản thành công -->
-    <?php if (!empty($_SESSION['activation_flash'])): ?>
-        <div class="bg-success text-white py-2 px-3 text-center small fw-semibold">
-            <i class="fa-solid fa-circle-check me-1"></i>
-            <?php
-                echo htmlspecialchars($_SESSION['activation_flash']);
-                unset($_SESSION['activation_flash']);
-            ?>
-        </div>
-    <?php endif; ?>
-
     <!-- 1. Thanh Thông Báo Trên Cùng (Topbar) -->
     <div class="edu-topbar">
         <div class="container d-flex flex-wrap justify-content-between align-items-center">

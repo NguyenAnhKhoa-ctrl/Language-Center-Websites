@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'password_hash' => $bcryptHash,
             'role'          => 'student',
             'avatar'        => 'https://ui-avatars.com/api/?name=' . urlencode($displayName) . '&background=2563EB&color=fff',
-            'is_activated'  => 0, // Chưa kích hoạt email -> hiển thị thanh thông báo nổi bật trên đầu trang
+            'is_activated'  => 1,
             'theme'         => 'light',
             'font_size'     => 'medium',
             'note_color'    => 'default'
