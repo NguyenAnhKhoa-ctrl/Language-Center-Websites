@@ -1,8 +1,9 @@
 # HỆ THỐNG WEBSITE QUẢN LÝ TRUNG TÂM NGOẠI NGỮ & GIA SƯ — EDUCENTER
 
 **Học phần:** Lập trình Web & Ứng dụng (`503073` — Đại học Tôn Đức Thắng)  
+**Giảng viên hướng dẫn:** Thầy Doãn Xuân Thanh  
 **Công nghệ sử dụng:** PHP 8.2 (PDO) + MySQL/MariaDB + Bootstrap 5.3 + JavaScript (ES6) + HTML5/CSS3  
-**Môi trường triển khai:** XAMPP Server (Apache 2.4 + MariaDB/MySQL)  
+**Môi trường triển khai:** AWS EC2 Cloud Server (`http://3.0.209.145/`) & XAMPP Server  
 **GitHub Repository:** https://github.com/NguyenAnhKhoa-ctrl/Language-Center-Websites
 
 ---

@@ -5,8 +5,10 @@ HỌC PHẦN: LẬP TRÌNH WEB & ỨNG DỤNG (503073) - ĐẠI HỌC TÔN ĐỨ
 
 1. THÔNG TIN NHÓM THỰC HIỆN & GITHUB REPOSITORY
 --------------------------------------------------------------------------------
-- Thành viên 1: Nguyễn Anh Khoa - MSSV: 52400051
-- Thành viên 2: Lý Hạo Danh     - MSSV: 52400175
+- Giảng viên hướng dẫn : Thầy Doãn Xuân Thanh
+- Thành viên 1         : Nguyễn Anh Khoa - MSSV: 52400051
+- Thành viên 2         : Lý Hạo Danh     - MSSV: 52400175
+- Live AWS Server URL  : http://3.0.209.145/
 - GitHub Repository URL:
   https://github.com/NguyenAnhKhoa-ctrl/Language-Center-Websites
 
