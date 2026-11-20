@@ -236,10 +236,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             // Lưu đồng bộ xuống bảng Grades trong MySQL nếu đang kết nối
             if ($db_connected && $pdo) {
                 try {
-                    $stmtCheck = $pdo->prepare("SELECT grade_id FROM Grades WHERE student_id = :sid AND class_id = :cid LIMIT 1");
+                    $stmtCheck = $pdo->prepare("SELECT grade_id FROM Grades WHERE student_id = :sid ORDER BY grade_id DESC LIMIT 1");
                     $stmtCheck->execute([
-                        ':sid' => $sid,
-                        ':cid' => (int)$currentCfg['class_id']
+                        ':sid' => $sid
                     ]);
                     $existingGradeId = $stmtCheck->fetchColumn();
 

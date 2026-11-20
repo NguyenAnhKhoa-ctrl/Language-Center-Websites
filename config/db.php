@@ -1,3 +1,4 @@
+-- Active: 1789998539739@@127.0.0.1@3306
 <?php
 /**
  * EDUCENTER - HỆ THỐNG WEBSITE QUẢN LÝ TRUNG TÂM NGOẠI NGỮ & GIA SƯ
@@ -348,6 +349,76 @@ $sample_student_lookup = [
             ['day' => 'Thứ 7', 'time' => '18:00 - 19:30', 'room' => 'Phòng VIP 3', 'teacher' => 'Cô Bảo Trâm'],
             ['day' => 'Chủ Nhật', 'time' => '18:00 - 19:30', 'room' => 'Phòng VIP 3', 'teacher' => 'Cô Bảo Trâm']
         ]
+    ],
+    'HV004' => [
+        'student_id'   => 'HV004',
+        'full_name'    => 'Hoàng Minh Quân',
+        'phone'        => '0933221100',
+        'email'        => 'minhquan.h@gmail.com',
+        'dob'          => '03/04/2001',
+        'class_name'   => 'IELTS Intensive K42',
+        'teacher_name' => 'Cô Nguyễn Thảo My',
+        'room'         => 'P.201',
+        'status'       => 'Bảo lưu',
+        'grades'       => [
+            'listening' => 6.0,
+            'reading'   => 6.5,
+            'writing'   => 6.0,
+            'speaking'  => 6.5,
+            'overall'   => 6.5,
+            'rank'      => 'Khá',
+            'comment'   => 'Phát âm cải thiện tốt, từ vựng phong phú.'
+        ],
+        'attendance'   => [
+            'total_lessons'    => 20,
+            'present'          => 18,
+            'absent_allowed'   => 2,
+            'absent_unallowed' => 0,
+            'rate'             => '90.0%',
+            'recent_history'   => [
+                ['date' => '10/10/2026', 'lesson' => 'Buổi 20: Luyện Speaking Part 2', 'status' => 'Có phép', 'note' => 'Báo bận lịch thi giữa kỳ']
+            ]
+        ],
+        'schedule'     => [
+            ['day' => 'Thứ 2', 'time' => '18:00 - 19:30', 'room' => 'P.201', 'teacher' => 'Cô Thảo My'],
+            ['day' => 'Thứ 4', 'time' => '18:00 - 19:30', 'room' => 'P.201', 'teacher' => 'Cô Thảo My'],
+            ['day' => 'Thứ 6', 'time' => '18:00 - 19:30', 'room' => 'P.201', 'teacher' => 'Cô Thảo My']
+        ]
+    ],
+    'HV005' => [
+        'student_id'   => 'HV005',
+        'full_name'    => 'Đỗ Phương Linh',
+        'phone'        => '0978112233',
+        'email'        => 'phuonglinh.do@gmail.com',
+        'dob'          => '19/12/2004',
+        'class_name'   => 'IELTS Intensive K42',
+        'teacher_name' => 'Cô Nguyễn Thảo My',
+        'room'         => 'P.201',
+        'status'       => 'Đang học',
+        'grades'       => [
+            'listening' => 7.0,
+            'reading'   => 7.5,
+            'writing'   => 6.5,
+            'speaking'  => 7.0,
+            'overall'   => 7.0,
+            'rank'      => 'Giỏi (IELTS 7.0)',
+            'comment'   => 'Tiếp thu nhanh, tư duy làm bài mạch lạc.'
+        ],
+        'attendance'   => [
+            'total_lessons'    => 24,
+            'present'          => 24,
+            'absent_allowed'   => 0,
+            'absent_unallowed' => 0,
+            'rate'             => '100%',
+            'recent_history'   => [
+                ['date' => '10/10/2026', 'lesson' => 'Buổi 24: Mock Test Speaking', 'status' => 'Có mặt', 'note' => 'Đến đúng giờ, phát âm tiến bộ']
+            ]
+        ],
+        'schedule'     => [
+            ['day' => 'Thứ 2', 'time' => '18:00 - 19:30', 'room' => 'P.201', 'teacher' => 'Cô Thảo My'],
+            ['day' => 'Thứ 4', 'time' => '18:00 - 19:30', 'room' => 'P.201', 'teacher' => 'Cô Thảo My'],
+            ['day' => 'Thứ 6', 'time' => '18:00 - 19:30', 'room' => 'P.201', 'teacher' => 'Cô Thảo My']
+        ]
     ]
 ];
 
@@ -361,6 +432,8 @@ function lookupStudentData($query, $pdo, $db_connected, $sample_data) {
         return null;
     }
 
+    $foundStudent = null;
+
     if ($db_connected && $pdo) {
         try {
             $stmt = $pdo->prepare("
@@ -371,8 +444,9 @@ function lookupStudentData($query, $pdo, $db_connected, $sample_data) {
                 LEFT JOIN Enrollments e ON s.student_id = e.student_id
                 LEFT JOIN Classes c ON e.class_id = c.class_id
                 LEFT JOIN Teachers t ON c.teacher_id = t.teacher_id
-                LEFT JOIN Grades g ON s.student_id = g.student_id AND c.class_id = g.class_id
+                LEFT JOIN Grades g ON s.student_id = g.student_id
                 WHERE s.student_code = :q1 OR s.phone = :q2 OR s.full_name LIKE :q3
+                ORDER BY g.updated_at DESC, g.grade_id DESC
                 LIMIT 1
             ");
             $stmt->execute([
@@ -383,7 +457,7 @@ function lookupStudentData($query, $pdo, $db_connected, $sample_data) {
             $row = $stmt->fetch();
             if ($row) {
                 $code = !empty($row['student_code']) ? $row['student_code'] : ('HV' . str_pad($row['student_id'], 3, '0', STR_PAD_LEFT));
-                return [
+                $foundStudent = [
                     'student_id'   => $code,
                     'full_name'    => $row['full_name'],
                     'phone'        => $row['phone'],
@@ -422,21 +496,21 @@ function lookupStudentData($query, $pdo, $db_connected, $sample_data) {
         }
     }
 
-    $query_upper = strtoupper($query);
-    $foundStudent = null;
-
-    if (isset($sample_data[$query_upper])) {
-        $foundStudent = $sample_data[$query_upper];
-    } else {
-        foreach ($sample_data as $code => $student) {
-            if ($student['phone'] === $query || stripos($student['full_name'], $query) !== false || $code === $query_upper) {
-                $foundStudent = $student;
-                break;
+    if ($foundStudent === null) {
+        $query_upper = strtoupper($query);
+        if (isset($sample_data[$query_upper])) {
+            $foundStudent = $sample_data[$query_upper];
+        } else {
+            foreach ($sample_data as $code => $student) {
+                if ($student['phone'] === $query || stripos($student['full_name'], $query) !== false || $code === $query_upper) {
+                    $foundStudent = $student;
+                    break;
+                }
             }
         }
     }
 
-    // Đồng bộ trực tiếp dữ liệu điểm 4 kỹ năng & nhận xét vừa cập nhật từ Admin (Session Fallback)
+    // Đồng bộ trực tiếp dữ liệu điểm 4 kỹ năng & nhận xét vừa cập nhật từ Admin (Session Sync)
     if ($foundStudent !== null && isset($_SESSION['admin_grades_by_class']) && is_array($_SESSION['admin_grades_by_class'])) {
         foreach ($_SESSION['admin_grades_by_class'] as $classRows) {
             foreach ($classRows as $grRow) {

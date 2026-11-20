@@ -18,20 +18,9 @@
                         </span>
                         <span class="fs-4 fw-bold text-white">EduCenter</span>
                     </div>
-                    <p class="mb-3">
+                    <p class="mb-0">
                         Hệ thống đào tạo Ngoại ngữ &amp; Kết nối Gia sư 1-1 chuẩn Quốc tế. Cam kết chuẩn đầu ra bằng hợp đồng pháp lý và minh bạch tiến độ học tập 24/7.
                     </p>
-                    <div class="d-flex gap-2">
-                        <a href="contact.php" class="btn btn-sm btn-outline-light rounded-circle" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;">
-                            <i class="fa-brands fa-facebook-f"></i>
-                        </a>
-                        <a href="contact.php" class="btn btn-sm btn-outline-light rounded-circle" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;">
-                            <i class="fa-brands fa-youtube"></i>
-                        </a>
-                        <a href="contact.php" class="btn btn-sm btn-outline-light rounded-circle" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;">
-                            <i class="fa-solid fa-envelope"></i>
-                        </a>
-                    </div>
                 </div>
 
                 <!-- Cột 2: Liên kết nhanh -->

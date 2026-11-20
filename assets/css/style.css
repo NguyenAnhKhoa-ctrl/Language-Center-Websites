@@ -59,6 +59,12 @@ a {
     font-size: 0.84rem;
     padding: 8px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    z-index: 1050;
+}
+
+.edu-topbar .dropdown-menu {
+    z-index: 1060;
 }
 
 .edu-topbar a {
@@ -1121,6 +1127,57 @@ body[data-edu-theme="dark"] .edu-section-title,
 body[data-edu-theme="dark"] .edu-course-title,
 body[data-edu-theme="dark"] .edu-brand {
     color: #f8fafc !important;
+}
+
+body[data-edu-theme="dark"] .text-muted,
+body[data-edu-theme="dark"] .text-secondary,
+body[data-edu-theme="dark"] .form-text,
+body[data-edu-theme="dark"] .form-check-label,
+body[data-edu-theme="dark"] small {
+    color: #cbd5e1 !important;
+}
+
+body[data-edu-theme="dark"] .form-label,
+body[data-edu-theme="dark"] label {
+    color: #f1f5f9 !important;
+}
+
+body[data-edu-theme="dark"] .form-control::placeholder,
+body[data-edu-theme="dark"] textarea::placeholder {
+    color: #94a3b8 !important;
+}
+
+body[data-edu-theme="dark"] .list-group-item:not(.active) {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+
+body[data-edu-theme="dark"] .dropdown-menu {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body[data-edu-theme="dark"] .dropdown-item {
+    color: #f1f5f9 !important;
+}
+
+body[data-edu-theme="dark"] .dropdown-item:hover,
+body[data-edu-theme="dark"] .dropdown-item:focus {
+    background-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+body[data-edu-theme="dark"] .dropdown-divider {
+    border-color: #334155 !important;
+}
+
+body[data-edu-theme="dark"] .accordion-item,
+body[data-edu-theme="dark"] .accordion-button,
+body[data-edu-theme="dark"] .accordion-body {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
 }
 
 body[data-edu-theme="dark"] .edu-nav-link {

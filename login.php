@@ -13,6 +13,7 @@ $pageTitle = 'Đăng Nhập Hệ Thống - EduCenter';
 $currentPage = 'login.php';
 
 $redirectTarget = isset($_GET['redirect']) ? trim($_GET['redirect']) : '';
+$isAdminLogin   = (strpos($redirectTarget, 'admin/') === 0 || isset($_GET['auth_required']));
 
 // Nếu đã đăng nhập, chuyển hướng về trang tương ứng (trừ khi đang yêu cầu đăng nhập quyền Admin)
 if (getCurrentUser() !== null && !isset($_GET['switch']) && !isset($_GET['auth_required'])) {
@@ -152,7 +153,7 @@ require_once __DIR__ . '/includes/header.php';
                                        class="form-control edu-input border-start-0"
                                        id="loginIdentifier"
                                        name="identifier"
-                                       placeholder="admin@educenter.edu.vn hoặc admin"
+                                       placeholder="Nhập email hoặc tên đăng nhập của bạn"
                                        value="<?php echo htmlspecialchars($identifier); ?>"
                                        required>
                             </div>
@@ -163,7 +164,9 @@ require_once __DIR__ . '/includes/header.php';
                                 <label for="loginPassword" class="form-label fw-semibold small mb-0">
                                     Mật khẩu <span class="text-danger">*</span>
                                 </label>
-                                <a href="forgot_password.php" class="small text-primary fw-semibold">Quên mật khẩu?</a>
+                                <?php if (!$isAdminLogin): ?>
+                                    <a href="forgot_password.php" class="small text-primary fw-semibold">Quên mật khẩu?</a>
+                                <?php endif; ?>
                             </div>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0 text-muted">
@@ -185,10 +188,12 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                     </form>
 
-                    <div class="text-center small text-muted">
-                        Chưa có tài khoản?
-                        <a href="signup.php" class="fw-bold text-primary">Đăng ký tài khoản mới</a>
-                    </div>
+                    <?php if (!$isAdminLogin): ?>
+                        <div class="text-center small text-muted">
+                            Chưa có tài khoản?
+                            <a href="signup.php" class="fw-bold text-primary">Đăng ký tài khoản mới</a>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

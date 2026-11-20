@@ -239,10 +239,6 @@ require_once __DIR__ . '/includes/header.php';
                                     <a href="profile.php?activate_account=1" class="fw-bold text-warning text-decoration-underline">Chưa kích hoạt (Bấm xác thực)</a>
                                 <?php endif; ?>
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">Giao diện:</span>
-                                <strong class="text-dark"><?php echo (($user['theme'] ?? 'light') === 'dark') ? 'Dark Mode (Tối)' : 'Light Mode (Sáng)'; ?></strong>
-                            </div>
                             <div class="d-flex justify-content-between">
                                 <span class="text-muted">Cỡ chữ hiển thị:</span>
                                 <strong class="text-primary text-uppercase"><?php echo htmlspecialchars($user['font_size'] ?? 'medium'); ?></strong>
@@ -406,42 +402,11 @@ require_once __DIR__ . '/includes/header.php';
 
                                 <form action="profile.php?tab=preferences" method="POST" id="preferencesForm">
                                     <input type="hidden" name="action" value="update_preferences">
-
-                                    <div class="mb-4">
-                                        <label class="form-label fw-semibold small d-block mb-2">1. Chế độ giao diện (Theme Mode)</label>
-                                        <div class="row g-3">
-                                            <div class="col-sm-6">
-                                                <label class="p-3 border rounded-3 d-flex align-items-center gap-3 w-100" style="cursor:pointer;">
-                                                    <input type="radio"
-                                                           name="theme_pref"
-                                                           value="light"
-                                                           class="form-check-input mt-0"
-                                                           <?php echo (($user['theme'] ?? 'light') === 'light') ? 'checked' : ''; ?>>
-                                                    <div>
-                                                        <strong class="d-block"><i class="fa-solid fa-sun text-warning me-1"></i>Giao diện Sáng (Light)</strong>
-                                                        <small class="text-muted">Trực quan, rõ nét ban ngày</small>
-                                                    </div>
-                                                </label>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <label class="p-3 border rounded-3 d-flex align-items-center gap-3 w-100" style="cursor:pointer;">
-                                                    <input type="radio"
-                                                           name="theme_pref"
-                                                           value="dark"
-                                                           class="form-check-input mt-0"
-                                                           <?php echo (($user['theme'] ?? 'light') === 'dark') ? 'checked' : ''; ?>>
-                                                    <div>
-                                                        <strong class="d-block"><i class="fa-solid fa-moon text-primary me-1"></i>Giao diện Tối (Dark)</strong>
-                                                        <small class="text-muted">Dịu mắt khi học tập ban đêm</small>
-                                                    </div>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <input type="hidden" name="theme_pref" value="<?php echo htmlspecialchars($user['theme'] ?? 'light'); ?>">
 
                                     <div class="row g-3 mb-4">
                                         <div class="col-md-6">
-                                            <label for="fontSizeSelect" class="form-label fw-semibold small">2. Kích thước phông chữ (Font Size)</label>
+                                            <label for="fontSizeSelect" class="form-label fw-semibold small">1. Kích thước phông chữ (Font Size)</label>
                                             <?php $currFont = $user['font_size'] ?? 'medium'; ?>
                                             <select id="fontSizeSelect" name="font_size" class="form-select edu-input">
                                                 <option value="small" <?php echo ($currFont === 'small') ? 'selected' : ''; ?>>Nhỏ gọn (Small - 14px)</option>
@@ -451,7 +416,7 @@ require_once __DIR__ . '/includes/header.php';
                                         </div>
 
                                         <div class="col-md-6">
-                                            <label for="noteColorSelect" class="form-label fw-semibold small">3. Màu sắc thẻ ghi chú &amp; lịch học</label>
+                                            <label for="noteColorSelect" class="form-label fw-semibold small">2. Màu sắc thẻ ghi chú &amp; lịch học</label>
                                             <?php $currColor = $user['note_color'] ?? 'default'; ?>
                                             <select id="noteColorSelect" name="note_color" class="form-select edu-input">
                                                 <option value="default" <?php echo ($currColor === 'default') ? 'selected' : ''; ?>>Mặc định hệ thống (Trắng)</option>

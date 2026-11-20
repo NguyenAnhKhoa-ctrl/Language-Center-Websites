@@ -43,6 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             if ($matchedUser === null) {
                 $errorMsg = 'Không tìm thấy tài khoản nào đăng ký với địa chỉ Email này.';
                 $step     = 'request';
+            } elseif (($matchedUser['role'] ?? '') === 'admin') {
+                $errorMsg = 'Tài khoản Quản trị viên không hỗ trợ khôi phục mật khẩu qua biểu mẫu công khai.';
+                $step     = 'request';
             } else {
                 $otpCode = (string)random_int(100000, 999999);
                 $_SESSION['password_reset_data'] = [
@@ -261,9 +264,6 @@ require_once __DIR__ . '/includes/header.php';
                                     </button>
                                     <button type="button" class="btn btn-sm btn-outline-success rounded-pill py-0 px-2 fill-reset-email" data-email="thaomy.ielts@educenter.edu.vn">
                                         thaomy.ielts@educenter.edu.vn
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill py-0 px-2 fill-reset-email" data-email="admin@educenter.edu.vn">
-                                        admin@educenter.edu.vn
                                     </button>
                                 </div>
                             </div>

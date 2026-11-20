@@ -165,9 +165,6 @@ require_once __DIR__ . '/includes/header.php';
                                 <span class="small text-muted">
                                     <i class="fa-solid fa-bolt text-warning me-1"></i>Hồ sơ đã được chuyển trực tiếp về Ban Quản Trị để xếp lịch Test đầu vào miễn phí.
                                 </span>
-                                <a href="admin/index.php" class="btn btn-sm btn-outline-success ms-auto">
-                                    <i class="fa-solid fa-gauge-high me-1"></i>Xem trên Admin Dashboard
-                                </a>
                             </div>
                         </div>
                     </div>
